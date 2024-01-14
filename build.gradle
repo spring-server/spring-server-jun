@@ -1,0 +1,30 @@
+plugins {
+    id("java")
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // App
+    implementation("com.google.guava:guava:${guavaVersion}")
+    implementation("ch.qos.logback:logback-classic:${logbackVersion}")
+    implementation("org.apache.commons:commons-dbcp2:${commonsDbcp2Version}")
+    implementation("org.reflections:reflections:${reflectionsVersion}")
+
+    // Test
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
+    testImplementation("org.assertj:assertj-core:${assertjVersion}")
+
+    // Lombok
+    compileOnly("org.projectlombok:lombok:${lombokVersion}")
+    testCompileOnly("org.projectlombok:lombok:${lombokVersion}")
+    annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
+    testAnnotationProcessor("org.projectlombok:lombok:${lombokVersion}")
+}
+
+test {
+    useJUnitPlatform()
+}

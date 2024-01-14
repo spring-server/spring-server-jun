@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Origogi's Portfolio</title>
+    <meta name="desciption" ontent="Hello World"/>
+    <meta name="author" content="hello-world"/>
+    <link rel="icon" type="image/png" href="assets/favicon.png"/>
+    <script src="https://kit.fontawesome.com/3cb806fd1b.js"  crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Poppins:wght@200&family=Source+Sans+Pro&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="style.css"/>
+    <link rel="stylesheet" href="sign-in.css"/>
+    <script defer src="main.js"></script>
+</head>
+
+<body class="sign-body">
+    <nav id="navbar" style="top: 0px;">
+        <div class="navbar__logo">
+        </div>
+        <ul class="navbar__menu">
+            <li class="navbar__menu__item" onclick="location.href='index.html';">Home</li>
+            <li class="navbar__menu__item active">Sign in</li>
+        </ul>
+
+        <button class="navbar__toggle-btn">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </nav>
+
+    <section id="about" class="section section__container">
+            <h1 class="sign__title">Member Access</h1>
+            <div class="container" id="container">
+
+                <div class="form-container sign-up-container">
+                    <form action="#">
+                        <h1>Create Account</h1>
+                        <span>or use your email for registration</span>
+                        <input type="text" placeholder="ID" />
+                        <input type="password" placeholder="Password" />
+                        <button>Sign Up</button>
+                    </form>
+                </div>
+
+                <div class="form-container sign-in-container">
+                    <form action="#">
+                        <h1>Sign in</h1>
+                        <span>or use your account</span>
+                        <input type="text" placeholder="ID" />
+                        <input type="password" placeholder="Password" />
+                        <button>Sign In</button>
+                    </form>
+                </div>
+
+                <div class="overlay-container">
+                    <div class="overlay">
+                        <div class="overlay-panel overlay-left">
+                            <h1>Welcome Back!</h1>
+                            <p>To keep connected with us please login with your personal info</p>
+                            <button class="ghost" id="signIn">Sign In</button>
+                        </div>
+
+                        <div class="overlay-panel overlay-right">
+                            <h1>Hello, Explorer!</h1>
+                            <p>Enter your personal details and start journey with us</p>
+                            <button class="ghost" id="signUp">Sign Up</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+    </section>
+</body>
+</html>
+
+<script>
+    const signUpButton = document.getElementById("signUp");
+    const signInButton = document.getElementById("signIn");
+    const container = document.getElementById("container");
+
+    signUpButton.addEventListener("click", () => {
+      container.classList.add("right-panel-active");
+    });
+
+    signInButton.addEventListener("click", () => {
+      container.classList.remove("right-panel-active");
+    });
+</script>
