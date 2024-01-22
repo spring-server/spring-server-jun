@@ -19,11 +19,11 @@ public enum UserErrorCodeAndMessage implements ErrorCodeAndMessage {
 
     @Override
     public HttpStatus getStatus() {
-        return null;
+        return httpStatus;
     }
 
     @Override
     public String getErrorMessage() {
-        return null;
+        return errorMessage;
     }
 }
