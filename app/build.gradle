@@ -1,0 +1,33 @@
+plugins {
+    id("java")
+    id("checkstyle")
+    id("pmd")
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    apply(from: "${rootDir}/script/analysis/pmd.gradle")
+    apply(from: "${rootDir}/script/analysis/checkstyle.gradle")
+
+    // Project
+    implementation(project(":mvc"))
+
+    // Test
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
+    testImplementation("org.assertj:assertj-core:${assertjVersion}")
+    implementation("org.reflections:reflections:${reflectionsVersion}")
+
+    // Lombok
+    compileOnly("org.projectlombok:lombok:${lombokVersion}")
+    testCompileOnly("org.projectlombok:lombok:${lombokVersion}")
+    annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
+    testAnnotationProcessor("org.projectlombok:lombok:${lombokVersion}")
+}
+
+test {
+    useJUnitPlatform()
+}
