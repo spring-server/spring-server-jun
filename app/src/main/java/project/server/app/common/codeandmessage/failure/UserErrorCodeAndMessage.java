@@ -3,14 +3,13 @@ package project.server.app.common.codeandmessage.failure;
 import project.server.app.common.codeandmessage.ErrorCodeAndMessage;
 import project.server.mvc.servlet.http.HttpStatus;
 
-public enum ErrorCodeAndMessages implements ErrorCodeAndMessage {
-    INVALID_PARAMETER(HttpStatus.BAD_REQUEST, "올바른 값을 입력해주세요."),
-    PAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "페이지를 찾을 수 없습니다.");
+public enum UserErrorCodeAndMessage implements ErrorCodeAndMessage {
+    ALREADY_SAVED_USER(HttpStatus.BAD_REQUEST, "이미 가입된 사용자 입니다.");
 
     private final HttpStatus httpStatus;
     private final String errorMessage;
 
-    ErrorCodeAndMessages(
+    UserErrorCodeAndMessage(
         HttpStatus httpStatus,
         String errorMessage
     ) {
@@ -20,11 +19,11 @@ public enum ErrorCodeAndMessages implements ErrorCodeAndMessage {
 
     @Override
     public HttpStatus getStatus() {
-        return httpStatus;
+        return null;
     }
 
     @Override
     public String getErrorMessage() {
-        return errorMessage;
+        return null;
     }
 }
