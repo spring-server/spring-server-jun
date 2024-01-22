@@ -1,6 +1,6 @@
 package project.server.app.common.codeandmessage;
 
-import project.server.mvc.tomcat.servlet.http.HttpStatus;
+import project.server.mvc.servlet.http.HttpStatus;
 
 public interface CodeAndMessage {
     HttpStatus getStatus();

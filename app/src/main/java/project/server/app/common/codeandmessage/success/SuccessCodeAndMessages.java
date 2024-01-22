@@ -1,7 +1,7 @@
 package project.server.app.common.codeandmessage.success;
 
 import project.server.app.common.codeandmessage.SuccessCodeAndMessage;
-import project.server.mvc.tomcat.servlet.http.HttpStatus;
+import project.server.mvc.servlet.http.HttpStatus;
 
 public enum SuccessCodeAndMessages implements SuccessCodeAndMessage {
     OK(HttpStatus.OK, "OK");
