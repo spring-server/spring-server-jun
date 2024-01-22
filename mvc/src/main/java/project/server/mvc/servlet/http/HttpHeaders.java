@@ -3,6 +3,7 @@ package project.server.mvc.servlet.http;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import static java.util.Collections.emptyList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,8 +66,11 @@ public class HttpHeaders {
     }
 
     private Cookies initCookie() {
-        List<String> cookieValues = this.headers.get(COOKIE)
-            .stream()
+        List<HttpHeader> cookies = this.headers.getOrDefault(COOKIE, emptyList());
+        if (cookies.isEmpty()) {
+            return Cookies.emptyCookies;
+        }
+        List<String> cookieValues = cookies.stream()
             .map(HttpHeader::getValue)
             .toList();
         return new Cookies(cookieValues);

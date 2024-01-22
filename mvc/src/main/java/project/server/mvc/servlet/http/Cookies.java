@@ -15,6 +15,7 @@ public class Cookies {
 
     private final List<String> cookies;
     private final Map<String, String> cookiesMap = new HashMap<>();
+    public static final Cookies emptyCookies = new Cookies();
 
     public Cookies() {
         this.cookies = new ArrayList<>();
