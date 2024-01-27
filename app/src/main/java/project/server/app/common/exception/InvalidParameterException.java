@@ -5,11 +5,11 @@ import project.server.app.common.codeandmessage.failure.ErrorCodeAndMessages;
 public class InvalidParameterException extends RuntimeException {
 
     private final ErrorCodeAndMessages errorCodeAndMessages;
-    private Object args;
+    private final Object[] args;
 
     public InvalidParameterException(Object... args) {
         this.errorCodeAndMessages = ErrorCodeAndMessages.INVALID_PARAMETER;
-        this.args = args;
+        this.args = args.clone();
     }
 
     public ErrorCodeAndMessages getErrorCodeAndMessages() {
