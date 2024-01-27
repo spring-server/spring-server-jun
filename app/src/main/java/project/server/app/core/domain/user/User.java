@@ -29,7 +29,11 @@ public class User {
         return id;
     }
 
-    public Username getUsername() {
+    public String getUsername() {
+        return username.value();
+    }
+
+    public Username getUsernameAsValue() {
         return username;
     }
 

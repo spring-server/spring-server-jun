@@ -4,6 +4,7 @@ import project.server.app.core.domain.user.User;
 import project.server.app.core.domain.user.UserRepository;
 import project.server.app.core.web.user.application.UserSaveUseCase;
 import project.server.app.core.web.user.application.UserSearchUseCase;
+import project.server.app.core.web.user.exception.DuplicatedUsernameException;
 import project.server.app.core.web.user.exception.UserNotFoundException;
 import project.server.mvc.springframework.annotation.Service;
 
@@ -18,6 +19,10 @@ public class UserService implements UserSaveUseCase, UserSearchUseCase {
 
     @Override
     public User save(User user) {
+        boolean duplicatedUser = userRepository.existByName(user.getUsername());
+        if (duplicatedUser) {
+            throw new DuplicatedUsernameException();
+        }
         return userRepository.save(user);
     }
 

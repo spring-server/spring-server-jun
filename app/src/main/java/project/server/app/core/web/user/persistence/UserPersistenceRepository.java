@@ -1,5 +1,7 @@
 package project.server.app.core.web.user.persistence;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,6 +14,9 @@ import project.server.mvc.springframework.annotation.Repository;
 
 @Repository
 public class UserPersistenceRepository implements UserRepository {
+
+    private static final Boolean ALREADY_EXIST = TRUE;
+    private static final Boolean NOT_FOUND = FALSE;
 
     private static final Map<Long, User> factory = new ConcurrentHashMap<>();
     private static final AtomicLong idGenerator = new AtomicLong(0L);
@@ -30,6 +35,15 @@ public class UserPersistenceRepository implements UserRepository {
     @Override
     public Optional<User> findById(Long userId) {
         return Optional.ofNullable(factory.get(userId));
+    }
+
+    @Override
+    public boolean existByName(String username) {
+        User findUser = factory.values().stream()
+            .filter(x -> x.getUsername().equals(username))
+            .findAny()
+            .orElseGet(() -> null);
+        return findUser != null ? ALREADY_EXIST : NOT_FOUND;
     }
 
     @Override
