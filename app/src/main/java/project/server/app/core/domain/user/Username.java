@@ -5,18 +5,13 @@ import java.util.regex.Pattern;
 
 public record Username(String value) {
 
-    private static final Pattern pattern = Pattern.compile("^[a-zA-Z_\\-]{1,13}$");
+    private static final Pattern pattern = Pattern.compile("^[a-zA-Z0-9_\\-]{7,13}$");
 
     public Username {
         validate(value);
     }
 
     private void validate(String value) {
-        if (value == null || value.isEmpty()) {
-            String message = String.format("올바른 이름을 입력해주세요. Value: %s", value);
-            throw new IllegalArgumentException(message);
-        }
-
         Matcher matcher = pattern.matcher(value);
         if (!matcher.matches()) {
             String message = String.format("올바른 이름을 입력해주세요. Value: %s", value);
