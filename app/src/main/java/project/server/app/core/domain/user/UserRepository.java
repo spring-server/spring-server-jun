@@ -1,5 +1,6 @@
 package project.server.app.core.domain.user;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository {
@@ -10,4 +11,6 @@ public interface UserRepository {
     void clear();
 
     boolean existByName(String username);
+
+    List<User> findAll();
 }
