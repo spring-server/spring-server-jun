@@ -31,7 +31,7 @@ public class UserPersistenceRepository implements UserRepository {
         try {
             Long id = idGenerator.incrementAndGet();
             if (!user.isNew()) {
-                throw new AlreadyRegisteredUserException(ALREADY_SAVED_USER);
+                throw new AlreadyRegisteredUserException();
             }
             user.registerId(id);
             factory.put(id, user);
