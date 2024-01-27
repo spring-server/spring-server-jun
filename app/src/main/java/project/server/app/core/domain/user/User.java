@@ -1,9 +1,7 @@
 package project.server.app.core.domain.user;
 
 import java.util.Objects;
-import lombok.Getter;
 
-@Getter
 public class User {
 
     private Long id;
@@ -27,6 +25,18 @@ public class User {
         this.password = new Password(password);
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public Username getUsername() {
+        return username;
+    }
+
+    public Password getPassword() {
+        return password;
+    }
+
     public boolean isNew() {
         return this.id == null;
     }
@@ -37,8 +47,12 @@ public class User {
 
     @Override
     public boolean equals(Object object) {
-        if (this == object) return true;
-        if (!(object instanceof User user)) return false;
+        if (this == object) {
+            return true;
+        }
+        if (!(object instanceof User user)) {
+            return false;
+        }
         return getId().equals(user.getId());
     }
 
