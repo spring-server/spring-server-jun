@@ -35,7 +35,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
     }
 
     private boolean isStaticResource(HttpServletRequest request) {
-        String url = request.getRequestURI();
+        String url = request.getRequestUri();
         return url.contains(STATIC_RESOURCE);
     }
 

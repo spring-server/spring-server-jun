@@ -69,7 +69,7 @@ public class Request implements HttpServletRequest {
     }
 
     @Override
-    public String getRequestURI() {
+    public String getRequestUri() {
         return requestLine.getRequestUrl();
     }
 

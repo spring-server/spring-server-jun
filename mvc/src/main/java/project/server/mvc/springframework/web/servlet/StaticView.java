@@ -23,7 +23,7 @@ public class StaticView {
         DataOutputStream dataOutputStream,
         InputStream inputStream
     ) throws IOException {
-        String contentType = getContentType(request.getRequestURI());
+        String contentType = getContentType(request.getRequestUri());
         byte[] buffer = readStream(inputStream);
         response200Header(dataOutputStream, buffer.length, contentType);
         responseBody(dataOutputStream, buffer);
@@ -34,7 +34,7 @@ public class StaticView {
     }
 
     private boolean isStaticPage(HttpServletRequest request) {
-        String url = request.getRequestURI();
+        String url = request.getRequestUri();
         return url.contains("html");
     }
 

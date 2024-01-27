@@ -33,7 +33,7 @@ public abstract class AbstractHandlerMethodMapping extends AbstractHandlerMappin
     }
 
     private String getRequestPath(HttpServletRequest request) {
-        return request.getRequestURI();
+        return request.getRequestUri();
     }
 
     private HandlerMethod lookupHandlerMethod(
