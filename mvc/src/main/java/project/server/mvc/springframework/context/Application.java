@@ -1,14 +1,11 @@
-package project.server.app;
+package project.server.mvc.springframework.context;
 
-import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import project.server.mvc.springframework.context.ApplicationContext;
-import project.server.mvc.springframework.context.ApplicationContextProvider;
 import project.server.mvc.springframework.handler.RequestHandler;
 
 public class Application {
