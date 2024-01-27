@@ -71,6 +71,10 @@ public class RequestLine {
             httpVersion == that.httpVersion;
     }
 
+    public String getHttpVersionAsString() {
+        return httpVersion.getValue();
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(httpMethod, httpVersion);

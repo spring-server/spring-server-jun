@@ -33,11 +33,11 @@ public class HandlerMethod {
     }
 
     private boolean isProcess(Method method) {
-        return method.getName().equals(PROCESS);
+        return PROCESS.equals(method.getName());
     }
 
     private boolean isHandlerRequest(Method method) {
-        return method.getName().equals(HANDLE_REQUEST);
+        return HANDLE_REQUEST.equals(method.getName());
     }
 
     public Object getHandler() {

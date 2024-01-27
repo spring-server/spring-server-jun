@@ -9,12 +9,12 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static project.server.mvc.springframework.context.ApplicationContextProvider.getBean;
-import project.server.mvc.servlet.Servlet;
 import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
 import project.server.mvc.servlet.Request;
 import project.server.mvc.servlet.Response;
+import project.server.mvc.servlet.Servlet;
+import static project.server.mvc.springframework.context.ApplicationContextProvider.getBean;
 
 public final class RequestHandler extends Thread {
 
@@ -28,6 +28,7 @@ public final class RequestHandler extends Thread {
         this.dispatcherServlet = getBean("dispatcherServlet");
     }
 
+    @Override
     public void run() {
         log.info("Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
         try (

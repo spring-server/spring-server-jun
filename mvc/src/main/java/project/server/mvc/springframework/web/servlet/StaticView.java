@@ -7,8 +7,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLConnection;
 import project.server.mvc.servlet.HttpServletRequest;
+import project.server.mvc.servlet.HttpServletResponse;
 
-public class StaticView {
+public class StaticView implements View {
 
     private static final String CARRIAGE_RETURN = "\r\n";
     private static final String STATIC_PREFIX = "static/";
@@ -38,12 +39,13 @@ public class StaticView {
         return url.contains("html");
     }
 
-    private void responseBody(
-        OutputStream outputStream,
-        byte[] body
-    ) throws IOException {
-        outputStream.write(body);
-        outputStream.flush();
+    @Override
+    public void render(
+        ModelAndView modelAndView,
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) throws Exception {
+//        res
     }
 
     private void response200Header(
@@ -66,6 +68,14 @@ public class StaticView {
             byteArrayOutputStream.write(buffer, 0, bytesRead);
         }
         return byteArrayOutputStream.toByteArray();
+    }
+
+    private void responseBody(
+        OutputStream outputStream,
+        byte[] body
+    ) throws IOException {
+        outputStream.write(body);
+        outputStream.flush();
     }
 
     private String getContentType(String filePath) {

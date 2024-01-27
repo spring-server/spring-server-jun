@@ -59,7 +59,7 @@ public abstract class AbstractHandlerMethodMapping extends AbstractHandlerMappin
                 new MappingRegistration(new HandlerMethod(homeController))
             );
             registry.put(
-                new RequestMappingInfo(HttpMethod.POST, "sign-up"),
+                new RequestMappingInfo(HttpMethod.POST, "/sign-up"),
                 new MappingRegistration(new HandlerMethod(signUpController))
             );
         }

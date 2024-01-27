@@ -31,6 +31,6 @@ public class SignUpController implements Handler {
 
         log.info("username: {}, password: {}", username, password);
         userSaveUseCase.save(new User(username, password));
-        return new ModelAndView("index.html");
+        return new ModelAndView("redirect:/index.html");
     }
 }

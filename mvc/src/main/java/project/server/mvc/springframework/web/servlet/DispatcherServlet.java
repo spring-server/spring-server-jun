@@ -16,7 +16,7 @@ public class DispatcherServlet extends FrameworkServlet {
     public DispatcherServlet() {
         this.handlerMappings = List.of(new RequestMappingHandlerMapping());
         this.handlerAdapters = List.of(new RequestMappingHandlerAdapter());
-        this.viewResolvers = List.of();
+        this.viewResolvers = List.of(new BeanNameViewResolver());
     }
 
     @Override
@@ -29,6 +29,13 @@ public class DispatcherServlet extends FrameworkServlet {
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
+        doDispatch(request, response);
+    }
+
+    private void doDispatch(
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) throws Exception {
         HandlerExecutionChain handler = getHandler(request);
         if (handler == null) {
             return;
@@ -36,15 +43,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
         HandlerAdapter handlerAdapter = getHandlerAdapter(handler.getHandler());
         ModelAndView modelAndView = handlerAdapter.handle(request, response, handler.getHandler());
-        applyDefaultViewName(request, response, modelAndView);
         processDispatchResult(request, response, modelAndView);
-    }
-
-    private void applyDefaultViewName(
-        HttpServletRequest request,
-        HttpServletResponse response,
-        ModelAndView modelAndView
-    ) {
     }
 
     private HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
@@ -85,7 +84,7 @@ public class DispatcherServlet extends FrameworkServlet {
     ) throws Exception {
         String viewName = modelAndView.getViewName();
         View view = resolveViewName(viewName);
-        view.render(modelAndView.getModelMap(), request, response);
+        view.render(modelAndView, request, response);
     }
 
     protected View resolveViewName(String viewName) {

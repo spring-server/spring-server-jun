@@ -90,7 +90,7 @@ public class HttpHeaders {
         Collections.sort(keys);
 
         for (String key : keys) {
-            if (key.equals(COOKIE)) {
+            if (COOKIE.equals(key)) {
                 stringBuilder.append(key)
                     .append(HEADER_DELIMITER)
                     .append(cookies);
