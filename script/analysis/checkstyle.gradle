@@ -1,0 +1,6 @@
+checkstyle {
+    maxWarnings = 5
+    configFile = file("${rootDir}/config/lint/server-rule.xml")
+    configProperties = ["suppressionFile": "${rootDir}/config/lint/server-suppresions.xml"]
+    toolVersion = checkStyleVersion
+}

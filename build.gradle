@@ -1,30 +1,40 @@
 plugins {
     id("java")
+    id("checkstyle")
+    id("pmd")
 }
 
-repositories {
-    mavenCentral()
+allprojects {
+    repositories {
+        mavenCentral()
+    }
 }
 
-dependencies {
-    // App
-    implementation("com.google.guava:guava:${guavaVersion}")
-    implementation("ch.qos.logback:logback-classic:${logbackVersion}")
-    implementation("org.apache.commons:commons-dbcp2:${commonsDbcp2Version}")
-    implementation("org.reflections:reflections:${reflectionsVersion}")
+subprojects {
+    apply plugin: ("java")
+    apply plugin: ("checkstyle")
+    apply plugin: ("pmd")
+    apply(from: "${rootDir}/script/analysis/pmd.gradle")
+    apply(from: "${rootDir}/script/analysis/checkstyle.gradle")
 
-    // Test
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
-    testImplementation("org.assertj:assertj-core:${assertjVersion}")
+    dependencies {
+        // Log
+        implementation("ch.qos.logback:logback-classic:${logbackVersion}")
 
-    // Lombok
-    compileOnly("org.projectlombok:lombok:${lombokVersion}")
-    testCompileOnly("org.projectlombok:lombok:${lombokVersion}")
-    annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
-    testAnnotationProcessor("org.projectlombok:lombok:${lombokVersion}")
-}
+        // Test
+        testImplementation("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
+        testImplementation("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+        testImplementation("org.junit.jupiter:junit-jupiter-params:${junitJupiterVersion}")
+        testImplementation("org.assertj:assertj-core:${assertjVersion}")
 
-test {
-    useJUnitPlatform()
+        // Lombok
+        compileOnly("org.projectlombok:lombok:${lombokVersion}")
+        testCompileOnly("org.projectlombok:lombok:${lombokVersion}")
+        annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
+        testAnnotationProcessor("org.projectlombok:lombok:${lombokVersion}")
+    }
+
+    test {
+        useJUnitPlatform()
+    }
 }
