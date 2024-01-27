@@ -1,12 +1,13 @@
 package project.server.app.core.web.user.persistence;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
-import static project.server.app.common.codeandmessage.failure.UserErrorCodeAndMessage.ALREADY_SAVED_USER;
+import project.server.app.common.exception.BusinessException;
 import project.server.app.core.domain.user.User;
 import project.server.app.core.domain.user.UserRepository;
-import project.server.app.common.exception.BusinessException;
+import static project.server.app.core.web.user.exception.UserErrorCodeAndMessage.ALREADY_SAVED_USER;
 import project.server.mvc.springframework.annotation.Repository;
 
 @Repository
@@ -24,5 +25,15 @@ public class UserPersistenceRepository implements UserRepository {
         user.registerId(id);
         factory.put(id, user);
         return user;
+    }
+
+    @Override
+    public Optional<User> findById(Long userId) {
+        return Optional.ofNullable(factory.get(userId));
+    }
+
+    @Override
+    public void clear() {
+        factory.clear();
     }
 }
