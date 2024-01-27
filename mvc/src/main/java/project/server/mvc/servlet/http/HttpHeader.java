@@ -24,10 +24,10 @@ public class HttpHeader {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        HttpHeader that = (HttpHeader) o;
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        HttpHeader that = (HttpHeader) object;
         return name.equals(that.name) && value.equals(that.value);
     }
 

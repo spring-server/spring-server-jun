@@ -15,10 +15,10 @@ public class HandlerExecutionChain {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        HandlerExecutionChain that = (HandlerExecutionChain) o;
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        HandlerExecutionChain that = (HandlerExecutionChain) object;
         return handler.equals(that.handler);
     }
 
