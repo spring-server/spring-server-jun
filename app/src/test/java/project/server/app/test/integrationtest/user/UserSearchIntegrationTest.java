@@ -12,7 +12,7 @@ import project.server.app.core.web.user.exception.UserNotFoundException;
 import project.server.app.test.integrationtest.IntegrationTestBase;
 import static project.server.mvc.springframework.context.ApplicationContext.getBean;
 
-@DisplayName("[IntegrationTest]")
+@DisplayName("[IntegrationTest] 사용자 조회 통합 테스트")
 class UserSearchIntegrationTest extends IntegrationTestBase {
 
     private final UserSaveUseCase userSaveUseCase = getBean(UserService.class);
