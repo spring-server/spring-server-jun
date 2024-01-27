@@ -20,6 +20,7 @@ dependencies {
 
     // Test
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:${assertjVersion}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
     testImplementation("org.assertj:assertj-core:${assertjVersion}")
     testImplementation("com.mockrunner:mockrunner-servlet:${mockrunnerServletVersion}")
