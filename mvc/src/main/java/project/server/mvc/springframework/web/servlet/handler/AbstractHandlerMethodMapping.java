@@ -45,7 +45,7 @@ public abstract class AbstractHandlerMethodMapping extends AbstractHandlerMappin
         return registration != null ? registration.handlerMethod : null;
     }
 
-    public class MappingRegistry {
+    class MappingRegistry {
 
         private final Map<RequestMappingInfo, MappingRegistration> registry;
 
