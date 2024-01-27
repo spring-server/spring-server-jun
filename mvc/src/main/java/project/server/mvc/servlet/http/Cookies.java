@@ -33,6 +33,14 @@ public class Cookies {
         }
     }
 
+    public boolean isEmpty() {
+        return this.cookies.isEmpty();
+    }
+
+    public String getValue(String name) {
+        return this.cookiesMap.get(name);
+    }
+
     @Override
     public String toString() {
         return String.format("%s", String.join(COOKIE_DELIMITER, cookies)) + CARRIAGE_RETURN;
