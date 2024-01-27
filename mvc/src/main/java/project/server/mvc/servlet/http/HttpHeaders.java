@@ -56,13 +56,8 @@ public class HttpHeaders {
         String key = pair[KEY];
         List<HttpHeader> values = this.headers
             .getOrDefault(key, new ArrayList<>());
-
-        if (values.isEmpty()) {
-            values.add(new HttpHeader(pair[KEY], value));
-            this.headers.put(key, values);
-            return;
-        }
         values.add(new HttpHeader(pair[KEY], value));
+        this.headers.put(key, values);
     }
 
     private Cookies initCookie() {
@@ -76,13 +71,14 @@ public class HttpHeaders {
         return new Cookies(cookieValues);
     }
 
+    public List<HttpHeader> getValue(String key) {
+        return headers.get(key);
+    }
+
     public int getContentLength() {
         List<HttpHeader> headers = this.headers.getOrDefault(
             CONTENT_LENGTH, List.of(new HttpHeader(CONTENT_LENGTH, "0"))
         );
-        if (headers == null || headers.isEmpty()) {
-            return 0;
-        }
         return Integer.parseInt(headers.get(0).getValue());
     }
 

@@ -10,11 +10,12 @@ public class RequestLine {
     private static final int URI = 1;
     private static final int VERSION = 2;
     private static final String DELIMITER = " ";
+    private static final String BASIC_PREFIX = "/";
     private static final String STATIC_HOME = "index.html";
 
-    private HttpMethod httpMethod;
-    private RequestUri requestURI;
-    private HttpVersion httpVersion;
+    private final HttpMethod httpMethod;
+    private final RequestUri requestURI;
+    private final HttpVersion httpVersion;
     private String contentType;
 
     public RequestLine(String startLine) {
@@ -35,7 +36,7 @@ public class RequestLine {
                 }
             }
             this.contentType = getContentType(requestFile);
-            return new RequestUri(requestFile);
+            return new RequestUri(BASIC_PREFIX + requestFile);
         }
         return new RequestUri(startLineArray[URI]);
     }
@@ -61,11 +62,13 @@ public class RequestLine {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        RequestLine requestLine = (RequestLine) o;
-        return httpMethod == requestLine.httpMethod && httpVersion == requestLine.httpVersion;
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        RequestLine that = (RequestLine) object;
+        return httpMethod == that.httpMethod &&
+            requestURI.equals(that.requestURI) &&
+            httpVersion == that.httpVersion;
     }
 
     @Override
