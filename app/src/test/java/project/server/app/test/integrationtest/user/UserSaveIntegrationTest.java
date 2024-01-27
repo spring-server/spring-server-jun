@@ -9,6 +9,7 @@ import project.server.app.core.domain.user.User;
 import project.server.app.core.web.user.application.UserSaveUseCase;
 import project.server.app.core.web.user.application.service.UserService;
 import project.server.app.core.web.user.exception.AlreadyRegisteredUserException;
+import project.server.app.core.web.user.exception.DuplicatedUsernameException;
 import project.server.app.test.integrationtest.IntegrationTestBase;
 import static project.server.mvc.springframework.context.ApplicationContext.getBean;
 
@@ -36,5 +37,17 @@ class UserSaveIntegrationTest extends IntegrationTestBase {
             .isInstanceOf(BusinessException.class)
             .isExactlyInstanceOf(AlreadyRegisteredUserException.class)
             .hasMessage("이미 가입된 사용자 입니다.");
+    }
+
+    @Test
+    @DisplayName("중복된 아이디로 가입을 시도하면 DuplicatedException이 발생한다.")
+    void duplicatedUsernameSaveTest() {
+        User newUser = new User("Steve-Jobs", "helloworld");
+        User duplicatedUser = new User("Steve-Jobs", "helloworld");
+        userSaveUseCase.save(newUser);
+
+        assertThatThrownBy(() -> userSaveUseCase.save(duplicatedUser))
+            .isInstanceOf(BusinessException.class)
+            .isExactlyInstanceOf(DuplicatedUsernameException.class);
     }
 }
