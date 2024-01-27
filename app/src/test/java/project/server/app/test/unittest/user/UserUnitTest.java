@@ -52,7 +52,7 @@ class UserUnitTest {
     void toStringOverrideTest() {
         User user = createUser();
 
-        String expected = String.format("id:%s, name:%s", user.getId(), user.getUsername());
+        String expected = String.format("id:%s, name:%s", user.getId(), user.getUsernameAsValue());
         assertEquals(expected, user.toString());
     }
 }
