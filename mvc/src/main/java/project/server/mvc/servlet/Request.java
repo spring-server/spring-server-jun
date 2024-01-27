@@ -12,7 +12,7 @@ import project.server.mvc.servlet.http.RequestLine;
 
 public class Request implements HttpServletRequest {
 
-    private static final String NULL_STRING = "";
+    private static final String EMPTY_STRING = "";
     private static final String HOST = "Host";
 
     private final RequestLine requestLine;
@@ -33,7 +33,7 @@ public class Request implements HttpServletRequest {
         List<String> headerLines = new ArrayList<>();
         String headerLine = "";
 
-        while (!NULL_STRING.equals(headerLine = bufferedReader.readLine())) {
+        while (!EMPTY_STRING.equals(headerLine = bufferedReader.readLine())) {
             headerLines.add(headerLine);
         }
         return new HttpHeaders(headerLines);
