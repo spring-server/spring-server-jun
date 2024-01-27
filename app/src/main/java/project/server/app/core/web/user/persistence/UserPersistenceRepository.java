@@ -4,9 +4,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
-import project.server.app.common.exception.BusinessException;
 import project.server.app.core.domain.user.User;
 import project.server.app.core.domain.user.UserRepository;
+import project.server.app.core.web.user.exception.AlreadyRegisteredUserException;
 import static project.server.app.core.web.user.exception.UserErrorCodeAndMessage.ALREADY_SAVED_USER;
 import project.server.mvc.springframework.annotation.Repository;
 
@@ -20,7 +20,7 @@ public class UserPersistenceRepository implements UserRepository {
     public User save(User user) {
         Long id = idGenerator.incrementAndGet();
         if (!user.isNew()) {
-            throw new BusinessException(ALREADY_SAVED_USER);
+            throw new AlreadyRegisteredUserException(ALREADY_SAVED_USER);
         }
         user.registerId(id);
         factory.put(id, user);
