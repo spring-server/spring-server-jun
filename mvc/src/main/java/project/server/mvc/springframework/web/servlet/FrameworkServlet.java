@@ -1,16 +1,18 @@
 package project.server.mvc.springframework.web.servlet;
 
 import java.io.IOException;
-import project.server.mvc.springframework.web.method.HandlerMethod;
-import project.server.mvc.springframework.web.servlet.resource.ResourceHttpRequestHandler;
+import java.util.List;
 import project.server.mvc.servlet.HttpServletBean;
 import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
+import project.server.mvc.springframework.web.method.HandlerMethod;
+import project.server.mvc.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
 public abstract class FrameworkServlet extends HttpServletBean {
 
     private static final HandlerMethod staticResourceHandlerMethod = new HandlerMethod(new ResourceHttpRequestHandler());
     private static final String STATIC_RESOURCE = ".";
+    private static final List<String> excludeStaticResources = List.of("my-info.html");
 
     @Override
     public void init() {
@@ -35,8 +37,21 @@ public abstract class FrameworkServlet extends HttpServletBean {
     }
 
     private boolean isStaticResource(HttpServletRequest request) {
-        String url = request.getRequestUri();
-        return url.contains(STATIC_RESOURCE);
+        String uri = request.getRequestUri();
+        String[] parsedUri = uri.split("/");
+        boolean uriContainsExclude = false;
+        for (String eachUri : parsedUri) {
+            if (eachUri.equals(".css") || eachUri.equals(".png") || eachUri.equals(".favicon")) {
+                return true;
+            }
+        }
+        for (String eachUri : parsedUri) {
+            if (excludeStaticResources.contains(eachUri)) {
+                uriContainsExclude = true;
+                break;
+            }
+        }
+        return uri.contains(STATIC_RESOURCE) && !uriContainsExclude;
     }
 
     private void processStaticRequest(

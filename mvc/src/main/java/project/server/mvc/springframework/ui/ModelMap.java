@@ -3,20 +3,18 @@ package project.server.mvc.springframework.ui;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ModelMap extends LinkedHashMap<String, Object> {
+public class ModelMap {
 
-    public ModelMap addAttribute(
+    private final Map<String, Object> map = new LinkedHashMap();
+
+    public void put(
         String attributeName,
         Object attributeValue
     ) {
-        put(attributeName, attributeValue);
-        return this;
+        map.put(attributeName, attributeValue);
     }
 
-    public ModelMap addAllAttributes(Map<String, ?> attributes) {
-        if (attributes != null) {
-            putAll(attributes);
-        }
-        return this;
+    public Object getAttribute(String key) {
+        return map.get(key);
     }
 }

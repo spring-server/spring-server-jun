@@ -75,6 +75,14 @@ public class HttpHeaders {
         return headers.get(key);
     }
 
+    public String getHeaderValue(String key) {
+        return headers.get(key).stream()
+            .filter(headerKey -> headerKey.getName().equals(key))
+            .findAny()
+            .map(HttpHeader::getValue)
+            .orElseGet(() -> null);
+    }
+
     public int getContentLength() {
         List<HttpHeader> headers = this.headers.getOrDefault(
             CONTENT_LENGTH, List.of(new HttpHeader(CONTENT_LENGTH, "0"))
@@ -88,6 +96,10 @@ public class HttpHeaders {
 
     public String getCookiesAsString() {
         return cookies.toString();
+    }
+
+    public Cookies getCookies() {
+        return cookies;
     }
 
     @Override

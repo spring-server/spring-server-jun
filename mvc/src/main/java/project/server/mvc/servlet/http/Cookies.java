@@ -30,10 +30,15 @@ public class Cookies {
 
     private void initCookieMap(List<String> cookies) {
         for (String cookie : cookies) {
-            String[] pair = cookie.split(DELIMITER);
-            String key = pair[KEY];
-            String value = pair[VALUE];
-            cookiesMap.put(key, new Cookie(key, value));
+            String[] cookiePairs = cookie.split(COOKIE_DELIMITER);
+            for (String pair : cookiePairs) {
+                String[] keyValue = pair.trim().split(DELIMITER, 2);
+                if (keyValue.length == 2) {
+                    String key = keyValue[KEY];
+                    String value = keyValue[VALUE];
+                    cookiesMap.put(key, new Cookie(key, value));
+                }
+            }
         }
     }
 
@@ -62,7 +67,7 @@ public class Cookies {
             }
             stringBuilder.append(key)
                 .append(DELIMITER)
-                .append(cookiesMap.get(key));
+                .append(cookiesMap.get(key).value());
         }
         return stringBuilder.toString().trim() + CARRIAGE_RETURN;
     }
