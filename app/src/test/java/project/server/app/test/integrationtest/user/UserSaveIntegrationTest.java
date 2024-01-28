@@ -72,7 +72,7 @@ class UserSaveIntegrationTest extends IntegrationTestBase {
 
         Set<Long> userIds = ConcurrentHashMap.newKeySet();
         for (int index = 1; index <= fixedUserCount; index++) {
-            User newUser = new User("User" + index, "Password" + index);
+            User newUser = new User("Username" + index, "Password" + index);
             executorService.submit(() -> {
                 try {
                     User savedUser = userSaveUseCase.save(newUser);
