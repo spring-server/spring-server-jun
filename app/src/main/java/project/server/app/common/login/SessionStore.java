@@ -15,20 +15,11 @@ public class SessionStore implements SessionManager {
     private static final Map<Long, Session> factory = new ConcurrentHashMap<>();
 
     @Override
-    public Session save(
-        Long userId,
-        Session session
-    ) {
-        factory.put(userId, session);
-        return session;
-    }
-
-    @Override
     public Session createSession(Long userId) {
         String uuid = randomUUID().toString();
-        LocalDateTime after30Minutes = now().plusMinutes(FIFTEEN_MINUTES);
+        LocalDateTime after15Minutes = now().plusMinutes(FIFTEEN_MINUTES);
 
-        Session newSession = new Session(userId, uuid, after30Minutes);
+        Session newSession = new Session(userId, uuid, after15Minutes);
         factory.put(userId, newSession);
         return newSession;
     }
