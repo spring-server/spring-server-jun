@@ -44,7 +44,7 @@ public class RedirectView implements View {
         String header = getStartLine(request, response)
             + LOCATION_DELIMITER + getRedirectLocation(request) + CARRIAGE_RETURN
             + "Access-Control-Allow-Origin: *" + CARRIAGE_RETURN
-            + "Cookie: " + response.getCookiesAsString() + CARRIAGE_RETURN
+            + "Set-Cookie: " + response.getCookiesAsString() + CARRIAGE_RETURN
             + CARRIAGE_RETURN;
         ByteBuffer headerBuffer = ByteBuffer.wrap(header.getBytes(StandardCharsets.UTF_8));
         while (headerBuffer.hasRemaining()) {

@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.StandardCharsets;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
 import static project.server.mvc.servlet.http.HttpStatus.NOT_FOUND;
@@ -24,7 +24,10 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler {
     private static final String STATIC_PREFIX = "static";
 
     @Override
-    public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void handleRequest(
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) throws IOException {
         String uri = request.getRequestUri();
         if (isStaticPage(request)) {
             InputStream inputStream = getInputStream(STATIC_PREFIX + uri);
@@ -74,8 +77,11 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler {
         response.setStatus(NOT_FOUND);
     }
 
-    private void responseBody(HttpServletResponse response, byte[] body) throws IOException {
-        SocketChannel channel = response.getSocketChannel(); // 가정: HttpServletResponse에 getSocketChannel() 메서드가 있다.
+    private void responseBody(
+        HttpServletResponse response,
+        byte[] body
+    ) throws IOException {
+        SocketChannel channel = response.getSocketChannel();
         ByteBuffer buffer = ByteBuffer.wrap(body);
         while (buffer.hasRemaining()) {
             channel.write(buffer);
@@ -92,7 +98,7 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler {
             CONTENT_TYPE + request.getContentType() + CARRIAGE_RETURN +
             CONTENT_LENGTH + lengthOfBodyContent + CARRIAGE_RETURN +
             CARRIAGE_RETURN;
-        ByteBuffer headerBuffer = ByteBuffer.wrap(header.getBytes(StandardCharsets.UTF_8));
+        ByteBuffer headerBuffer = ByteBuffer.wrap(header.getBytes(UTF_8));
         while (headerBuffer.hasRemaining()) {
             channel.write(headerBuffer);
         }

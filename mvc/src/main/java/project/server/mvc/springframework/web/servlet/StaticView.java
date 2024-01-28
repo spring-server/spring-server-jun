@@ -1,43 +1,18 @@
 package project.server.mvc.springframework.web.servlet;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URLConnection;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
 
 public class StaticView implements View {
 
     private static final String CARRIAGE_RETURN = "\r\n";
-    private static final String STATIC_PREFIX = "static/";
-
-    public InputStream getInputStream(String path) {
-        return getClass().getClassLoader()
-            .getResourceAsStream(path);
-    }
-
-    private void response(
-        HttpServletRequest request,
-        DataOutputStream dataOutputStream,
-        InputStream inputStream
-    ) throws IOException {
-        String contentType = getContentType(request.getRequestUri());
-        byte[] buffer = readStream(inputStream);
-        response200Header(dataOutputStream, buffer.length, contentType);
-        responseBody(dataOutputStream, buffer);
-    }
-
-    private void responsePageNotFound() {
-
-    }
-
-    private boolean isStaticPage(HttpServletRequest request) {
-        String url = request.getRequestUri();
-        return url.contains("html");
-    }
+    private static final String DELIMITER = " ";
+    private static final String LOCATION_DELIMITER = "Location: ";
+    private static final String REDIRECT_LOCATION = "/index.html";
 
     @Override
     public void render(
@@ -45,44 +20,38 @@ public class StaticView implements View {
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
-//        res
+        response(request, response);
     }
 
-    private void response200Header(
-        OutputStream outputStream,
-        int lengthOfBodyContent,
-        String contentType
+    private void response(
+        HttpServletRequest request,
+        HttpServletResponse response
     ) throws IOException {
-        DataOutputStream dos = new DataOutputStream(outputStream);
-        dos.writeBytes("HTTP/1.1 200 OK " + CARRIAGE_RETURN);
-        dos.writeBytes("Content-Type: " + contentType + CARRIAGE_RETURN);
-        dos.writeBytes("Content-Length: " + lengthOfBodyContent + CARRIAGE_RETURN);
-        dos.writeBytes(CARRIAGE_RETURN);
+        setResponseHeader(request, response);
     }
 
-    private byte[] readStream(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int bytesRead;
-        while ((bytesRead = inputStream.read(buffer)) != -1) {
-            byteArrayOutputStream.write(buffer, 0, bytesRead);
-        }
-        return byteArrayOutputStream.toByteArray();
-    }
-
-    private void responseBody(
-        OutputStream outputStream,
-        byte[] body
+    private void setResponseHeader(
+        HttpServletRequest request,
+        HttpServletResponse response
     ) throws IOException {
-        outputStream.write(body);
-        outputStream.flush();
+        SocketChannel channel = response.getSocketChannel();
+        StringBuilder headerBuilder = getStringBuilder(response);
+
+        String header = headerBuilder.toString();
+        ByteBuffer headerBuffer = ByteBuffer.wrap(header.getBytes(UTF_8));
+        while (headerBuffer.hasRemaining()) {
+            channel.write(headerBuffer);
+        }
     }
 
-    private String getContentType(String filePath) {
-        String contentType = URLConnection.guessContentTypeFromName(filePath);
-        if (contentType == null) {
-            contentType = "application/octet-stream";
-        }
-        return contentType;
+    private StringBuilder getStringBuilder(HttpServletResponse response) {
+        StringBuilder headerBuilder = new StringBuilder();
+        headerBuilder.append(getStartLine(response));
+        headerBuilder.append(CARRIAGE_RETURN);
+        return headerBuilder;
+    }
+
+    private String getStartLine(HttpServletResponse response) {
+        return String.format("HTTP/1.1 %s%s", response.getStatusAsString(), CARRIAGE_RETURN);
     }
 }

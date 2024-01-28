@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import project.server.mvc.servlet.http.Cookies;
 import project.server.mvc.servlet.http.HttpHeader;
 import project.server.mvc.servlet.http.HttpHeaders;
 import project.server.mvc.servlet.http.HttpMethod;
@@ -104,6 +105,16 @@ public class Request implements HttpServletRequest {
     @Override
     public String getAttribute(String key) {
         return requestBody.getAttribute(key);
+    }
+
+    @Override
+    public Cookies getCookies() {
+        return headers.getCookies();
+    }
+
+    @Override
+    public String getHeader(String key) {
+        return headers.getHeaderValue(key);
     }
 
     @Override
