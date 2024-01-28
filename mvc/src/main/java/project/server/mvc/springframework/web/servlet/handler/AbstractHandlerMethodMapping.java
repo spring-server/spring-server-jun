@@ -3,12 +3,12 @@ package project.server.mvc.springframework.web.servlet.handler;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import project.server.mvc.servlet.HttpServletRequest;
+import project.server.mvc.servlet.http.HttpMethod;
 import project.server.mvc.springframework.context.ApplicationContext;
+import project.server.mvc.springframework.handler.RequestMappingInfo;
 import project.server.mvc.springframework.web.method.HandlerMethod;
 import project.server.mvc.springframework.web.servlet.resource.ResourceHttpRequestHandler;
-import project.server.mvc.servlet.http.HttpMethod;
-import project.server.mvc.servlet.HttpServletRequest;
-import project.server.mvc.springframework.handler.RequestMappingInfo;
 
 public abstract class AbstractHandlerMethodMapping extends AbstractHandlerMapping {
 
@@ -53,6 +53,7 @@ public abstract class AbstractHandlerMethodMapping extends AbstractHandlerMappin
             this.registry = new HashMap<>();
             Object homeController = Optional.ofNullable(ApplicationContext.getBean("HomeController")).get();
             Object signUpController = Optional.ofNullable(ApplicationContext.getBean("SignUpController")).get();
+            Object loginUpController = Optional.ofNullable(ApplicationContext.getBean("LoginController")).get();
 
             registry.put(
                 new RequestMappingInfo(HttpMethod.GET, "/"),
@@ -61,6 +62,10 @@ public abstract class AbstractHandlerMethodMapping extends AbstractHandlerMappin
             registry.put(
                 new RequestMappingInfo(HttpMethod.POST, "/sign-up"),
                 new MappingRegistration(new HandlerMethod(signUpController))
+            );
+            registry.put(
+                new RequestMappingInfo(HttpMethod.POST, "/sign-in"),
+                new MappingRegistration(new HandlerMethod(loginUpController))
             );
         }
 
