@@ -14,7 +14,7 @@ public class Cookies {
     private static final String CARRIAGE_RETURN = "\r\n";
 
     private final List<String> cookies;
-    private final Map<String, String> cookiesMap;
+    private final Map<String, Cookie> cookiesMap;
     public static final Cookies emptyCookies = new Cookies();
 
     public Cookies() {
@@ -31,7 +31,9 @@ public class Cookies {
     private void initCookieMap(List<String> cookies) {
         for (String cookie : cookies) {
             String[] pair = cookie.split(DELIMITER);
-            cookiesMap.put(pair[KEY], pair[VALUE]);
+            String key = pair[KEY];
+            String value = pair[VALUE];
+            cookiesMap.put(key, new Cookie(key, value));
         }
     }
 
@@ -39,16 +41,16 @@ public class Cookies {
         return this.cookies.isEmpty();
     }
 
-    public Map<String, String> getCookiesMap() {
+    public Map<String, Cookie> getCookiesMap() {
         return cookiesMap;
     }
 
-    public String getValue(String name) {
+    public Cookie getValue(String name) {
         return this.cookiesMap.get(name);
     }
 
     public void add(Cookie cookie) {
-        this.cookiesMap.put(cookie.name(), cookie.value());
+        this.cookiesMap.put(cookie.name(), cookie);
     }
 
     @Override
