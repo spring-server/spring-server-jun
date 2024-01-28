@@ -6,6 +6,7 @@ import project.server.app.common.exception.UnAuthorizedException;
 import project.server.app.common.login.Session;
 import project.server.app.core.domain.user.User;
 import project.server.app.core.domain.user.UserRepository;
+import project.server.app.core.web.user.application.SessionManager;
 import project.server.app.core.web.user.application.UserLoginUseCase;
 import project.server.app.core.web.user.exception.UserNotFoundException;
 import project.server.mvc.springframework.annotation.Service;

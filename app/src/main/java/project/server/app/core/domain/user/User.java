@@ -1,12 +1,17 @@
 package project.server.app.core.domain.user;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
+import static project.server.app.core.domain.user.Deleted.FALSE;
 
 public class User {
 
     private Long id;
     private Username username;
     private Password password;
+    private LocalDateTime createdAt;
+    private LocalDateTime lastModifiedAt;
+    private Deleted deleted;
 
     public User(
         String username,
@@ -17,12 +22,26 @@ public class User {
 
     public User(
         Long id,
-        String name,
+        String username,
         String password
     ) {
+        this(id, username, password, LocalDateTime.now(), null, FALSE);
+    }
+
+    public User(
+        Long id,
+        String username,
+        String password,
+        LocalDateTime createdAt,
+        LocalDateTime lastModifiedAt,
+        Deleted deleted
+    ) {
         this.id = id;
-        this.username = new Username(name);
+        this.username = new Username(username);
         this.password = new Password(password);
+        this.createdAt = createdAt;
+        this.lastModifiedAt = lastModifiedAt;
+        this.deleted = deleted;
     }
 
     public Long getId() {
@@ -41,12 +60,20 @@ public class User {
         return password.value();
     }
 
+    public Deleted getDeleted() {
+        return deleted;
+    }
+
     public boolean isNew() {
         return this.id == null;
     }
 
     public void registerId(Long id) {
         this.id = id;
+    }
+
+    public boolean isAlreadyDeleted() {
+        return this.deleted.equals(Deleted.TRUE);
     }
 
     @Override
@@ -58,6 +85,11 @@ public class User {
             return false;
         }
         return getId().equals(user.getId());
+    }
+
+    public void delete(LocalDateTime lastModifiedAt) {
+        this.lastModifiedAt = lastModifiedAt;
+        this.deleted = Deleted.TRUE;
     }
 
     @Override

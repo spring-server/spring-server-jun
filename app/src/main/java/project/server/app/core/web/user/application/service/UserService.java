@@ -1,7 +1,10 @@
 package project.server.app.core.web.user.application.service;
 
+import java.time.LocalDateTime;
+import project.server.app.common.login.LoginUser;
 import project.server.app.core.domain.user.User;
 import project.server.app.core.domain.user.UserRepository;
+import project.server.app.core.web.user.application.UserDeleteUseCase;
 import project.server.app.core.web.user.application.UserSaveUseCase;
 import project.server.app.core.web.user.application.UserSearchUseCase;
 import project.server.app.core.web.user.exception.DuplicatedUsernameException;
@@ -9,7 +12,7 @@ import project.server.app.core.web.user.exception.UserNotFoundException;
 import project.server.mvc.springframework.annotation.Service;
 
 @Service
-public class UserService implements UserSaveUseCase, UserSearchUseCase {
+public class UserService implements UserSaveUseCase, UserSearchUseCase, UserDeleteUseCase {
 
     private final UserRepository userRepository;
 
@@ -30,5 +33,17 @@ public class UserService implements UserSaveUseCase, UserSearchUseCase {
     public User findById(Long userId) {
         return userRepository.findById(userId)
             .orElseThrow(UserNotFoundException::new);
+    }
+
+    @Override
+    public void delete(LoginUser loginUser) {
+        User findUser = userRepository.findById(loginUser.getUserId())
+            .orElseThrow(UserNotFoundException::new);
+
+        if (findUser.isAlreadyDeleted()) {
+            throw new UserNotFoundException();
+        }
+
+        findUser.delete(LocalDateTime.now());
     }
 }

@@ -7,7 +7,7 @@ import java.util.Optional;
 import static java.util.UUID.randomUUID;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
-import project.server.app.core.web.user.application.service.SessionManager;
+import project.server.app.core.web.user.application.SessionManager;
 import project.server.mvc.springframework.annotation.Component;
 
 @Slf4j
