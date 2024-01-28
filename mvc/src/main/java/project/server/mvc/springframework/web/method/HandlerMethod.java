@@ -57,10 +57,14 @@ public class HandlerMethod {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        HandlerMethod that = (HandlerMethod) o;
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        HandlerMethod that = (HandlerMethod) object;
         return handler.equals(that.handler);
     }
 
