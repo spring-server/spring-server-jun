@@ -19,7 +19,7 @@ class RequestBodyUnitTest {
 
     @Test
     @DisplayName("RequestBody에서 Username, Password를 얻을 수 있다.")
-    public void requestBodyGetAttributeUnitTest() {
+    void requestBodyGetAttributeUnitTest() {
         RequestBody requestBody = new RequestBody(REQUEST_BODY);
         assertAll(
             () -> assertEquals("Steve-Jobs", requestBody.getAttribute("username")),
