@@ -37,8 +37,8 @@ public class User {
         return username;
     }
 
-    public Password getPassword() {
-        return password;
+    public String getPassword() {
+        return password.value();
     }
 
     public boolean isNew() {

@@ -49,7 +49,7 @@ public class UserPersistenceRepository implements UserRepository {
     @Override
     public boolean existByName(String username) {
         User findUser = factory.values().stream()
-            .filter(equals(username))
+            .filter(equalsUsername(username))
             .findAny()
             .orElseGet(() -> null);
         return findUser != null ? ALREADY_EXIST : NOT_FOUND;
@@ -68,8 +68,8 @@ public class UserPersistenceRepository implements UserRepository {
     ) {
         return Optional.ofNullable(
             factory.values().stream()
-                .filter(equals(username))
-                .filter(equals(password))
+                .filter(equalsUsername(username))
+                .filter(equalsPassword(password))
                 .findAny()
                 .orElseGet(() -> null)
         );
@@ -80,7 +80,11 @@ public class UserPersistenceRepository implements UserRepository {
         factory.clear();
     }
 
-    private Predicate<User> equals(String username) {
+    private Predicate<User> equalsUsername(String username) {
         return user -> user.getUsername().equals(username);
+    }
+
+    private Predicate<User> equalsPassword(String password) {
+        return user -> user.getPassword().equals(password);
     }
 }
