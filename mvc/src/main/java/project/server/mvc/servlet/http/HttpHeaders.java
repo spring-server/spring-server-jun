@@ -82,6 +82,14 @@ public class HttpHeaders {
         return Integer.parseInt(headers.get(0).getValue());
     }
 
+    public void addCookie(Cookie cookie) {
+        this.cookies.add(cookie);
+    }
+
+    public String getCookiesAsString() {
+        return cookies.toString();
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
