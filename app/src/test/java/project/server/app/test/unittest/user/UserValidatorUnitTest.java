@@ -22,7 +22,7 @@ class UserValidatorUnitTest {
     @NullAndEmptySource
     @DisplayName("사용자 이름이 Null 또는 빈 값이면 InvalidParameterException이 발생한다.")
     void usernameNullOrBlank(String parameter) {
-        assertThatThrownBy(() -> validator.validateSignUp(parameter, "helloworld"))
+        assertThatThrownBy(() -> validator.validateSignUpInfo(parameter, "helloworld"))
             .isInstanceOf(RuntimeException.class)
             .isExactlyInstanceOf(InvalidParameterException.class);
     }
@@ -31,7 +31,7 @@ class UserValidatorUnitTest {
     @NullAndEmptySource
     @DisplayName("사용자 비밀번호가 Null 또는 빈 값이면 InvalidParameterException이 발생한다.")
     void passwordNullOrBlank(String parameter) {
-        assertThatThrownBy(() -> validator.validateSignUp("Steve-Jobs", parameter))
+        assertThatThrownBy(() -> validator.validateSignUpInfo("Steve-Jobs", parameter))
             .isInstanceOf(RuntimeException.class)
             .isExactlyInstanceOf(InvalidParameterException.class);
     }

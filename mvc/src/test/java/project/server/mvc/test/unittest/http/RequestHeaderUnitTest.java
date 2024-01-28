@@ -53,7 +53,7 @@ class RequestHeaderUnitTest {
                 headerLines.add(headerLine);
             }
         } catch (IOException exception) {
-            exception.printStackTrace();
+            throw new RuntimeException();
         }
         return headerLines;
     }
