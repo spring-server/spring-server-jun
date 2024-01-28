@@ -1,37 +1,43 @@
 package project.server.app.common.login;
 
 import java.util.Objects;
+import project.server.app.core.domain.user.User;
 
 public class LoginUser {
 
     private final Long userId;
-    private final String username;
     private final String loginIp;
     private boolean valid;
 
     public LoginUser(
         Long userId,
-        String username,
         String loginIp
     ) {
         this.userId = userId;
-        this.username = username;
         this.loginIp = loginIp;
+    }
+
+    public LoginUser(User user) {
+        this.userId = user.getId();
+        this.loginIp = null;
+        this.valid = true;
+    }
+
+    public LoginUser(Session session) {
+        this.userId = session.getUserId();
+        this.loginIp = null;
+        this.valid = session.isValid();
     }
 
     public static LoginUser create(
         String username,
         String password
     ) {
-        return new LoginUser(1L, password, "");
+        return null;
     }
 
     public Long getUserId() {
         return userId;
-    }
-
-    public String getUsername() {
-        return username;
     }
 
     public String getLoginIp() {

@@ -2,7 +2,7 @@ package project.server.app.core.web.user.presentation;
 
 import lombok.extern.slf4j.Slf4j;
 import project.server.app.common.login.Session;
-import project.server.app.core.web.user.application.LoginUseCase;
+import project.server.app.core.web.user.application.UserLoginUseCase;
 import project.server.app.core.web.user.presentation.validator.UserValidator;
 import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
@@ -17,14 +17,14 @@ import static project.server.mvc.servlet.http.HttpStatus.OK;
 public class LoginController implements Handler {
 
     private final UserValidator validator;
-    private final LoginUseCase loginUseCase;
+    private final UserLoginUseCase userLoginUseCase;
 
     public LoginController(
         UserValidator validator,
-        LoginUseCase loginUseCase
+        UserLoginUseCase userLoginUseCase
     ) {
         this.validator = validator;
-        this.loginUseCase = loginUseCase;
+        this.userLoginUseCase = userLoginUseCase;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class LoginController implements Handler {
         log.info("username: {}, password: {}", username, password);
 
         validator.validateLoginInfo(username, password);
-        Session session = loginUseCase.login(username, password);
+        Session session = userLoginUseCase.login(username, password);
 
         setResponse(response, session);
         return new ModelAndView("redirect:/index.html");
@@ -47,7 +47,7 @@ public class LoginController implements Handler {
         HttpServletResponse response,
         Session session
     ) {
-        Cookie cookie = new Cookie(session.getUserId(), session.getSessionId());
+        Cookie cookie = new Cookie("sessionId", session.getUserIdAsString());
         response.addCookie(cookie);
         response.setStatus(OK);
     }

@@ -6,8 +6,10 @@ import static project.server.mvc.tomcat.PortFinder.findPort;
 public class BlogApplication {
 
     public static void main(String[] args) {
-        int port = findPort(args);
-        Application application = new Application("project", port, 200);
+        String packages = "project";
+        final int port = findPort(args);
+        final int tomcatThreadCount = 200;
+        Application application = new Application(packages, port, tomcatThreadCount);
         application.start();
     }
 }

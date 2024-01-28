@@ -1,6 +1,7 @@
 package project.server.app.core.web.user.presentation.validator;
 
 import project.server.app.common.exception.InvalidParameterException;
+import project.server.app.common.exception.UnAuthorizedException;
 import project.server.mvc.springframework.annotation.Component;
 
 @Component
@@ -27,6 +28,12 @@ public class UserValidator {
         }
         if (username.isBlank() || password.isBlank()) {
             throw new InvalidParameterException(username, password);
+        }
+    }
+
+    public void validateSessionId(Long sessionId) {
+        if (sessionId == null) {
+            throw new UnAuthorizedException();
         }
     }
 }

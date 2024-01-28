@@ -19,8 +19,8 @@ public class Session {
         this.expired = expired;
     }
 
-    public String getUserId() {
-        return userId.toString();
+    public Long getUserId() {
+        return userId;
     }
 
     public String getSessionId() {
@@ -29,6 +29,14 @@ public class Session {
 
     public LocalDateTime getExpired() {
         return expired;
+    }
+
+    public boolean isValid() {
+        return expired.isAfter(LocalDateTime.now());
+    }
+
+    public String getUserIdAsString() {
+        return userId.toString();
     }
 
     @Override
@@ -42,5 +50,14 @@ public class Session {
     @Override
     public int hashCode() {
         return Objects.hash(sessionId);
+    }
+
+    @Override
+    public String toString() {
+        return "Session{" +
+            "userId=" + userId +
+            ", sessionId='" + sessionId + '\'' +
+            ", expired=" + expired +
+            '}';
     }
 }
