@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
-import static project.server.mvc.servlet.http.HttpStatus.MOVE_PERMANENTLY;
 
 public class RedirectView implements View {
 
@@ -29,7 +28,6 @@ public class RedirectView implements View {
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
-        response.setStatus(MOVE_PERMANENTLY);
         response(request, response);
     }
 
@@ -47,6 +45,7 @@ public class RedirectView implements View {
         DataOutputStream dos = new DataOutputStream(response.getOutputStream());
         dos.writeBytes(getStartLine(request, response));
         dos.writeBytes(LOCATION_DELIMITER + getRedirectLocation(request) + CARRIAGE_RETURN);
+        dos.writeBytes("Cookie: " + response.getCookiesAsString() + CARRIAGE_RETURN);
         dos.writeBytes(CARRIAGE_RETURN);
         dos.flush();
         dos.close();

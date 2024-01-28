@@ -6,7 +6,19 @@ import project.server.mvc.springframework.annotation.Component;
 @Component
 public class UserValidator {
 
-    public void validateSignUp(
+    public void validateSignUpInfo(
+        String username,
+        String password
+    ) {
+        if (username == null || password == null) {
+            throw new InvalidParameterException(username, password);
+        }
+        if (username.isBlank() || password.isBlank()) {
+            throw new InvalidParameterException(username, password);
+        }
+    }
+
+    public void validateLoginInfo(
         String username,
         String password
     ) {
