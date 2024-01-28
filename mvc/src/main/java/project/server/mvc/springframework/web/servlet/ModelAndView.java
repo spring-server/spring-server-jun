@@ -10,14 +10,20 @@ public class ModelAndView {
     public ModelAndView() {
     }
 
-    public ModelAndView(Object view) {
+    public ModelAndView(
+        Object view,
+        ModelMap model
+    ) {
         this.view = view;
-        this.model = new ModelMap();
+        this.model = model;
+    }
+
+    public ModelAndView(Object view) {
+        this(view, null);
     }
 
     public ModelAndView(String viewName) {
-        this.view = viewName;
-        this.model = new ModelMap();
+        this(viewName, null);
     }
 
     public Object getView() {
