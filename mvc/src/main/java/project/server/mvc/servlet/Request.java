@@ -83,7 +83,7 @@ public class Request implements HttpServletRequest {
 
     @Override
     public String getRequestUri() {
-        return requestLine.getRequestUrl();
+        return requestLine.getRequestUri();
     }
 
     @Override
