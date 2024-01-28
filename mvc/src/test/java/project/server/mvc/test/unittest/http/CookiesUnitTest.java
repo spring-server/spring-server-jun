@@ -21,6 +21,6 @@ class CookiesUnitTest {
     @DisplayName("쿠키 목록에 key를 넣으면 value 값이 나온다.")
     void cookieGetValueTest() {
         Cookies cookies = new Cookies(List.of("name=value"));
-        assertEquals("value", cookies.getValue("name"));
+        assertEquals("value", cookies.getValue("name").value());
     }
 }
