@@ -25,6 +25,16 @@ public class Request implements HttpServletRequest {
         this.requestBody = parseRequestBody(bufferedReader);
     }
 
+    public Request(
+        RequestLine requestLine,
+        HttpHeaders headers,
+        RequestBody requestBody
+    ) {
+        this.requestLine = requestLine;
+        this.headers = headers;
+        this.requestBody = requestBody;
+    }
+
     private RequestLine parseRequestLine(BufferedReader bufferedReader) throws IOException {
         return new RequestLine(bufferedReader.readLine());
     }

@@ -1,10 +1,11 @@
 package project.server.mvc.springframework.web.servlet.resource;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
 import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
 import static project.server.mvc.servlet.http.HttpStatus.NOT_FOUND;
@@ -23,10 +24,7 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler {
     private static final String STATIC_PREFIX = "static";
 
     @Override
-    public void handleRequest(
-        HttpServletRequest request,
-        HttpServletResponse response
-    ) throws IOException {
+    public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String uri = request.getRequestUri();
         if (isStaticPage(request)) {
             InputStream inputStream = getInputStream(STATIC_PREFIX + uri);
@@ -59,8 +57,7 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler {
     }
 
     private InputStream getInputStream(String path) {
-        return getClass().getClassLoader()
-            .getResourceAsStream(path);
+        return getClass().getClassLoader().getResourceAsStream(path);
     }
 
     private void response(
@@ -70,19 +67,19 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler {
     ) throws IOException {
         byte[] buffer = readStream(inputStream);
         setResponseHeader(request, response, buffer.length);
-        responseBody(response.getOutputStream(), buffer);
+        responseBody(response, buffer);
     }
 
     private void responsePageNotFound(HttpServletResponse response) {
         response.setStatus(NOT_FOUND);
     }
 
-    private void responseBody(
-        OutputStream outputStream,
-        byte[] body
-    ) throws IOException {
-        outputStream.write(body);
-        outputStream.flush();
+    private void responseBody(HttpServletResponse response, byte[] body) throws IOException {
+        SocketChannel channel = response.getSocketChannel(); // 가정: HttpServletResponse에 getSocketChannel() 메서드가 있다.
+        ByteBuffer buffer = ByteBuffer.wrap(body);
+        while (buffer.hasRemaining()) {
+            channel.write(buffer);
+        }
     }
 
     private void setResponseHeader(
@@ -90,11 +87,15 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler {
         HttpServletResponse response,
         int lengthOfBodyContent
     ) throws IOException {
-        DataOutputStream dos = new DataOutputStream(response.getOutputStream());
-        dos.writeBytes(request.getHttpVersion() + getStatus(response) + CARRIAGE_RETURN);
-        dos.writeBytes(CONTENT_TYPE + request.getContentType() + CARRIAGE_RETURN);
-        dos.writeBytes(CONTENT_LENGTH + lengthOfBodyContent + CARRIAGE_RETURN);
-        dos.writeBytes(CARRIAGE_RETURN);
+        SocketChannel channel = response.getSocketChannel();
+        String header = request.getHttpVersion() + DELIMITER + getStatus(response) + CARRIAGE_RETURN +
+            CONTENT_TYPE + request.getContentType() + CARRIAGE_RETURN +
+            CONTENT_LENGTH + lengthOfBodyContent + CARRIAGE_RETURN +
+            CARRIAGE_RETURN;
+        ByteBuffer headerBuffer = ByteBuffer.wrap(header.getBytes(StandardCharsets.UTF_8));
+        while (headerBuffer.hasRemaining()) {
+            channel.write(headerBuffer);
+        }
     }
 
     private static String getStatus(HttpServletResponse response) {

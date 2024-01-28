@@ -13,7 +13,7 @@ public class RequestBody {
     private final Map<String, String> attributes;
 
     public RequestBody(String body) {
-        if (body == null) {
+        if (body == null || body.isBlank()) {
             attributes = null;
             return;
         }
