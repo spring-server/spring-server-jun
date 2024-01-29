@@ -25,13 +25,9 @@ public final class HeaderUtils {
 
     public static Long getSessionId(Cookies cookies) {
         Map<String, Cookie> cookiesMap = cookies.getCookiesMap();
-        for (String key : cookiesMap.keySet()) {
-            if (key != null && key.equals(SESSION_ID)) {
-                Cookie cookie = cookiesMap.get(key);
-                if (cookie.value() != null) {
-                    return extractSessionId(cookie);
-                }
-            }
+        Cookie findCookie = cookiesMap.get(SESSION_ID);
+        if (findCookie != null) {
+            return extractSessionId(findCookie);
         }
         return null;
     }
