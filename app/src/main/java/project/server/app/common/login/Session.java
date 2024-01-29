@@ -3,36 +3,14 @@ package project.server.app.common.login;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class Session {
+public record Session(
+    Long userId,
+    String sessionId,
+    LocalDateTime expiredAt
+) {
 
-    private final Long userId;
-    private final String sessionId;
-    private final LocalDateTime expired;
-
-    public Session(
-        Long userId,
-        String sessionId,
-        LocalDateTime expired
-    ) {
-        this.userId = userId;
-        this.sessionId = sessionId;
-        this.expired = expired;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public LocalDateTime getExpired() {
-        return expired;
-    }
-
-    public boolean isValid() {
-        return expired.isAfter(LocalDateTime.now());
+    public boolean isValid(LocalDateTime expiredAt) {
+        return this.expiredAt.isAfter(expiredAt);
     }
 
     public String getUserIdAsString() {
@@ -40,10 +18,14 @@ public class Session {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Session session = (Session) o;
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        Session session = (Session) object;
         return sessionId.equals(session.sessionId);
     }
 
@@ -54,10 +36,6 @@ public class Session {
 
     @Override
     public String toString() {
-        return "Session{" +
-            "userId=" + userId +
-            ", sessionId='" + sessionId + '\'' +
-            ", expired=" + expired +
-            '}';
+        return String.format("userId:%s, sessionId:%s, expiredAt:%s", userId, sessionId, expiredAt);
     }
 }

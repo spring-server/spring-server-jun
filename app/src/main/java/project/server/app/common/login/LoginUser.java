@@ -1,5 +1,6 @@
 package project.server.app.common.login;
 
+import static java.time.LocalDateTime.now;
 import java.util.Objects;
 
 public class LoginUser {
@@ -17,9 +18,9 @@ public class LoginUser {
     }
 
     public LoginUser(Session session) {
-        this.userId = session.getUserId();
+        this.userId = session.userId();
         this.loginIp = null;
-        this.valid = session.isValid();
+        this.valid = session.isValid(now());
     }
 
     public Long getUserId() {
@@ -28,6 +29,10 @@ public class LoginUser {
 
     public String getLoginIp() {
         return loginIp;
+    }
+
+    public boolean isValid() {
+        return valid;
     }
 
     @Override
@@ -45,5 +50,10 @@ public class LoginUser {
     @Override
     public int hashCode() {
         return Objects.hash(userId);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("userId:%s", userId);
     }
 }

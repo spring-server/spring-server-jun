@@ -1,11 +1,11 @@
 package project.server.mvc.tomcat;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
 import project.server.mvc.servlet.Request;
@@ -16,6 +16,7 @@ import project.server.mvc.servlet.http.RequestLine;
 import static project.server.mvc.springframework.context.ApplicationContextProvider.getBean;
 import project.server.mvc.springframework.web.servlet.DispatcherServlet;
 
+@Slf4j
 public class AsyncRequest implements Runnable {
 
     private static final int START_OFFSET = 0;
@@ -49,27 +50,28 @@ public class AsyncRequest implements Runnable {
             }
 
             String requestBody = getRequestBodyBuilder(lines, index);
-            OutputStream outputStream = socketChannel.socket().getOutputStream();
 
-            HttpServletRequest request = createHttpServletRequest(lines, headerLines, requestBody);
-            HttpServletResponse response = new Response(socketChannel, outputStream);
-            dispatcherServlet.service(request, response);
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        } finally {
-            try {
-                socketChannel.close();
-            } catch (IOException exception) {
-                exception.printStackTrace();
+            try (SocketChannel channel = this.socketChannel;
+                 OutputStream outputStream = channel.socket().getOutputStream()) {
+
+                HttpServletRequest request = createHttpServletRequest(lines, headerLines, requestBody);
+                HttpServletResponse response = new Response(channel, outputStream);
+                dispatcherServlet.service(request, response);
             }
+
+        } catch (Exception exception) {
+            log.error("message: {}", exception.getMessage());
         }
     }
 
-    private String getRequestBodyBuilder(String[] lines, int index) {
+    private String getRequestBodyBuilder(
+        String[] lines,
+        int index
+    ) {
         StringBuilder requestBodyBuilder = new StringBuilder();
         if (index < lines.length) {
-            for (index++; index < lines.length; index++) {
-                requestBodyBuilder.append(lines[index])
+            for (int subIndex = index + 1; subIndex < lines.length; subIndex++) {
+                requestBodyBuilder.append(lines[subIndex])
                     .append(CARRIAGE_RETURN);
             }
         }

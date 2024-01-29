@@ -20,16 +20,16 @@ public class GlobalExceptionHandler {
     }
 
     public HttpStatus getHttpStatus(String message) {
-        if (message.equals("중복된 아이디 입니다.")) {
+        if ("중복된 아이디 입니다.".equals(message)) {
             return HttpStatus.BAD_REQUEST;
         }
-        if (message.equals("올바른 값을 입력해주세요.")) {
+        if ("올바른 값을 입력해주세요.".equals(message)) {
             return HttpStatus.BAD_REQUEST;
         }
-        if (message.equals("이미 가입된 사용자 입니다.")) {
+        if ("이미 가입된 사용자 입니다.".equals(message)) {
             return HttpStatus.BAD_REQUEST;
         }
-        if (message.equals("사용자를 찾을 수 없습니다.")) {
+        if ("사용자를 찾을 수 없습니다.".equals(message)) {
             return HttpStatus.NOT_FOUND;
         }
         return HttpStatus.INTERNAL_SERVER_ERROR;

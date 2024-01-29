@@ -56,10 +56,14 @@ public class MyInfoView implements View {
         int lengthOfBodyContent
     ) throws IOException {
         SocketChannel channel = response.getSocketChannel();
-        String header = request.getHttpVersion() + DELIMITER + getStatus(response) + CARRIAGE_RETURN +
-            CONTENT_TYPE + request.getContentType() + CARRIAGE_RETURN +
-            CONTENT_LENGTH + lengthOfBodyContent + CARRIAGE_RETURN +
-            CARRIAGE_RETURN;
+        String header = request.getHttpVersion() + DELIMITER + getStatus(response) + CARRIAGE_RETURN
+            + CONTENT_TYPE
+            + request.getContentType()
+            + CARRIAGE_RETURN
+            + CONTENT_LENGTH
+            + lengthOfBodyContent
+            + CARRIAGE_RETURN
+            + CARRIAGE_RETURN;
         ByteBuffer headerBuffer = ByteBuffer.wrap(header.getBytes(UTF_8));
         while (headerBuffer.hasRemaining()) {
             channel.write(headerBuffer);

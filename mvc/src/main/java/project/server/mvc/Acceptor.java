@@ -11,8 +11,8 @@ import java.util.Iterator;
 import java.util.Set;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import project.server.mvc.tomcat.Nio2EndPoint;
 import project.server.mvc.tomcat.AsyncRequest;
+import project.server.mvc.tomcat.Nio2EndPoint;
 
 @Slf4j
 public class Acceptor implements Runnable {
@@ -39,6 +39,7 @@ public class Acceptor implements Runnable {
         serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
     }
 
+    @Override
     @SneakyThrows
     public void run() {
         while (true) {

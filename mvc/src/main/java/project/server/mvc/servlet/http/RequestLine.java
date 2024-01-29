@@ -13,6 +13,7 @@ public class RequestLine {
     private static final String DELIMITER = " ";
     private static final String BASIC_PREFIX = "/";
     private static final String STATIC_HOME = "index.html";
+    private static final String OCTET_STREAM = "application/octet-stream";
 
     private final HttpMethod httpMethod;
     private final RequestUri requestUri;
@@ -41,24 +42,22 @@ public class RequestLine {
     ) {
         String requestFile;
         if (!startLine.isEmpty()) {
-            requestFile = getRequestFile(startLineArray, null);
+            requestFile = getRequestFile(startLineArray);
             this.contentType = getContentType(requestFile);
             return new RequestUri(BASIC_PREFIX + requestFile);
         }
         return null;
     }
 
-    private String getRequestFile(
-        String[] startLineArray,
-        String requestFile
-    ) {
+    private String getRequestFile(String[] startLineArray) {
+        String resultFile = null;
         if (isStaticResource(startLineArray)) {
-            requestFile = startLineArray[URI].substring(1);
-            if (requestFile.isEmpty()) {
-                requestFile = STATIC_HOME;
+            resultFile = startLineArray[URI].substring(1);
+            if (resultFile.isEmpty()) {
+                resultFile = STATIC_HOME;
             }
         }
-        return requestFile;
+        return resultFile;
     }
 
     private boolean isStaticResource(String[] startLineArray) {
@@ -68,7 +67,7 @@ public class RequestLine {
     private String getContentType(String filePath) {
         String contentType = URLConnection.guessContentTypeFromName(filePath);
         if (contentType == null) {
-            contentType = "application/octet-stream";
+            contentType = OCTET_STREAM;
         }
         return contentType;
     }
@@ -94,9 +93,9 @@ public class RequestLine {
             return false;
         }
         RequestLine that = (RequestLine) object;
-        return httpMethod == that.httpMethod &&
-            requestUri.equals(that.requestUri) &&
-            httpVersion == that.httpVersion;
+        return httpMethod == that.httpMethod
+            && requestUri.equals(that.requestUri)
+            && httpVersion == that.httpVersion;
     }
 
     public String getHttpVersionAsString() {

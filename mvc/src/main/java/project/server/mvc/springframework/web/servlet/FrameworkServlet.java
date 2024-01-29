@@ -41,7 +41,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
         String[] parsedUri = uri.split("/");
         boolean uriContainsExclude = false;
         for (String eachUri : parsedUri) {
-            if (eachUri.equals(".css") || eachUri.equals(".png") || eachUri.equals(".favicon")) {
+            if (".css".equals(eachUri) || ".png".equals(eachUri) || ".favicon".equals(eachUri)) {
                 return true;
             }
         }

@@ -1,7 +1,7 @@
 package project.server.app.core.web.user.presentation;
 
 import lombok.extern.slf4j.Slf4j;
-import static project.server.app.common.login.HeaderUtils.getSessionId;
+import static project.server.app.common.utils.HeaderUtils.getSessionId;
 import project.server.app.common.login.LoginUser;
 import project.server.app.common.login.Session;
 import project.server.app.core.web.user.application.UserDeleteUseCase;
