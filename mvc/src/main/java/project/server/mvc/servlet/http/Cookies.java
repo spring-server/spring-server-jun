@@ -1,6 +1,5 @@
 package project.server.mvc.servlet.http;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,19 +12,16 @@ public class Cookies {
     private static final String COOKIE_DELIMITER = "; ";
     private static final String CARRIAGE_RETURN = "\r\n";
 
-    private final List<String> cookies;
     private final Map<String, Cookie> cookiesMap;
     public static final Cookies emptyCookies = new Cookies();
 
     public Cookies() {
-        this.cookies = new ArrayList<>();
         this.cookiesMap = new HashMap<>();
     }
 
     public Cookies(List<String> cookieValues) {
-        this.cookies = cookieValues;
         this.cookiesMap = new HashMap<>();
-        initCookieMap(cookies);
+        initCookieMap(cookieValues);
     }
 
     private void initCookieMap(List<String> cookies) {
@@ -43,7 +39,7 @@ public class Cookies {
     }
 
     public boolean isEmpty() {
-        return this.cookies.isEmpty();
+        return this.cookiesMap.isEmpty();
     }
 
     public Map<String, Cookie> getCookiesMap() {
