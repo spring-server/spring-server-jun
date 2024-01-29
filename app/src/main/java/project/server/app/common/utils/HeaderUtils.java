@@ -1,4 +1,4 @@
-package project.server.app.common.login;
+package project.server.app.common.utils;
 
 import java.util.Map;
 import project.server.mvc.servlet.http.Cookie;
@@ -12,17 +12,6 @@ public final class HeaderUtils {
         throw new AssertionError("올바른 방식으로 생성자를 호출해주세요.");
     }
 
-    public static boolean getLoginFlag(String logined) {
-        if (logined == null) {
-            return false;
-        }
-        try {
-            return Boolean.parseBoolean(logined);
-        } catch (Exception exception) {
-            return false;
-        }
-    }
-
     public static Long getSessionId(Cookies cookies) {
         Map<String, Cookie> cookiesMap = cookies.getCookiesMap();
         Cookie findCookie = cookiesMap.get(SESSION_ID);
@@ -33,7 +22,7 @@ public final class HeaderUtils {
     }
 
     private static Long extractSessionId(Cookie cookie) {
-        if (cookie != null && cookie.value() != null) {
+        if (cookie.value() != null) {
             String sessionId = cookie.value();
             return parseLong(sessionId);
         }
