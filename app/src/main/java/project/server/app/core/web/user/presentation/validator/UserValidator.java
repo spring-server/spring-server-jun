@@ -31,8 +31,8 @@ public class UserValidator {
         }
     }
 
-    public void validateSessionId(Long sessionId) {
-        if (sessionId == null) {
+    public void validateSessionId(Long userId) {
+        if (userId == null) {
             throw new UnAuthorizedException();
         }
     }
