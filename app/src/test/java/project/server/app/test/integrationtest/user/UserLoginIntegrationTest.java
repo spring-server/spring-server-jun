@@ -17,8 +17,8 @@ import static project.server.mvc.springframework.context.ApplicationContext.getB
 @DisplayName("[IntegrationTest] 로그인 통합 테스트")
 class UserLoginIntegrationTest extends IntegrationTestBase {
 
-    private UserSaveUseCase userSaveUseCase = getBean(UserService.class);
-    private UserLoginUseCase loginUseCase = getBean(UserLoginService.class);
+    private final UserSaveUseCase userSaveUseCase = getBean(UserService.class);
+    private final UserLoginUseCase loginUseCase = getBean(UserLoginService.class);
 
     @Test
     @DisplayName("정상적으로 로그인이 되면 세션이 발급된다.")
@@ -36,7 +36,7 @@ class UserLoginIntegrationTest extends IntegrationTestBase {
         User savedUser = userSaveUseCase.save(newUser);
         Session session = loginUseCase.login(savedUser.getUsername(), savedUser.getPassword());
 
-        assertNotNull(loginUseCase.findSessionById(session.getUserId()));
+        assertNotNull(loginUseCase.findSessionById(session.userId()));
     }
 
     @Test
