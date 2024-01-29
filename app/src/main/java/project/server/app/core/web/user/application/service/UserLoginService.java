@@ -1,5 +1,6 @@
 package project.server.app.core.web.user.application.service;
 
+import static java.time.LocalDateTime.now;
 import lombok.extern.slf4j.Slf4j;
 import project.server.app.common.exception.SessionExpiredException;
 import project.server.app.common.exception.UnAuthorizedException;
@@ -41,7 +42,7 @@ public class UserLoginService implements UserLoginUseCase {
         Session findSession = sessionManager.findByUserId(userId)
             .orElseThrow(UnAuthorizedException::new);
 
-        if (!findSession.isValid()) {
+        if (!findSession.isValid(now())) {
             throw new SessionExpiredException();
         }
         return findSession;
