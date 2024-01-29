@@ -21,8 +21,8 @@ class UserUnitTest {
     @Test
     @DisplayName("equals를 재정의 했을 때, 값이 같다면 같은 객체로 인식한다.")
     void userEqualsTest() {
-        User user = createUser();
-        User sameUser = createUser();
+        User user = new User(1L, "John-Wak", "Hello0145");
+        User sameUser = new User(1L, "John-Wak", "Hello0145");
 
         assertEquals(user, sameUser);
     }
@@ -30,7 +30,7 @@ class UserUnitTest {
     @Test
     @DisplayName("equals를 재정의 했을 때, 값이 다르다면 다른 객체로 인식한다.")
     void differentUserEqualsTest() {
-        User user = createUser();
+        User user = new User(2L, "John-Wak", "Hello0145");
         User differentUser = new User(3L, "John-Wak", "Hello0145");
 
         assertNotEquals(user, differentUser);
