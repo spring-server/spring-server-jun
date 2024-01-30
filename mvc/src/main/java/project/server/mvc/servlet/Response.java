@@ -57,4 +57,9 @@ public class Response implements HttpServletResponse {
     public SocketChannel getSocketChannel() {
         return socketChannel;
     }
+
+    @Override
+    public HttpStatus getStatus() {
+        return status;
+    }
 }

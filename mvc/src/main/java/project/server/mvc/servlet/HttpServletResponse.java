@@ -14,4 +14,6 @@ public interface HttpServletResponse extends ServletResponse {
     String getCookiesAsString();
 
     SocketChannel getSocketChannel();
+
+    HttpStatus getStatus();
 }
