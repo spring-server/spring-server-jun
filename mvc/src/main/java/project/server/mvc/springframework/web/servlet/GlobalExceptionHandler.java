@@ -3,6 +3,7 @@ package project.server.mvc.springframework.web.servlet;
 import lombok.extern.slf4j.Slf4j;
 import project.server.mvc.servlet.HttpServletResponse;
 import project.server.mvc.servlet.http.HttpStatus;
+import static project.server.mvc.servlet.http.HttpStatus.UN_AUTHORIZED;
 import project.server.mvc.springframework.annotation.Component;
 
 @Slf4j
@@ -31,6 +32,9 @@ public class GlobalExceptionHandler {
         }
         if ("사용자를 찾을 수 없습니다.".equals(message)) {
             return HttpStatus.NOT_FOUND;
+        }
+        if ("권한이 존재하지 않습니다.".equals(message)) {
+            return UN_AUTHORIZED;
         }
         return HttpStatus.INTERNAL_SERVER_ERROR;
     }
