@@ -6,6 +6,7 @@ import project.server.app.core.web.user.application.UserSaveUseCase;
 import project.server.app.core.web.user.presentation.validator.UserValidator;
 import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
+import static project.server.mvc.servlet.http.HttpStatus.OK;
 import project.server.mvc.springframework.annotation.Controller;
 import project.server.mvc.springframework.annotation.RequestMapping;
 import project.server.mvc.springframework.web.servlet.Handler;
@@ -36,8 +37,10 @@ public class SignUpController implements Handler {
         String password = request.getAttribute("password");
         log.info("username: {}, password: {}", username, password);
 
-        validator.validateSignUp(username, password);
+        validator.validateLoginInfo(username, password);
         userSaveUseCase.save(new User(username, password));
+
+        response.setStatus(OK);
         return new ModelAndView("redirect:/index.html");
     }
 }

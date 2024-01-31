@@ -1,43 +1,27 @@
 package project.server.mvc.springframework.web.servlet;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URLConnection;
+import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
+import project.server.mvc.servlet.http.HttpStatus;
+import static project.server.mvc.servlet.http.HttpStatus.UN_AUTHORIZED;
 
 public class StaticView implements View {
 
     private static final String CARRIAGE_RETURN = "\r\n";
-    private static final String STATIC_PREFIX = "static/";
-
-    public InputStream getInputStream(String path) {
-        return getClass().getClassLoader()
-            .getResourceAsStream(path);
-    }
-
-    private void response(
-        HttpServletRequest request,
-        DataOutputStream dataOutputStream,
-        InputStream inputStream
-    ) throws IOException {
-        String contentType = getContentType(request.getRequestUri());
-        byte[] buffer = readStream(inputStream);
-        response200Header(dataOutputStream, buffer.length, contentType);
-        responseBody(dataOutputStream, buffer);
-    }
-
-    private void responsePageNotFound() {
-
-    }
-
-    private boolean isStaticPage(HttpServletRequest request) {
-        String url = request.getRequestUri();
-        return url.contains("html");
-    }
+    private static final String INVALID_COOKIE = "Set-Cookie=; Max-Age=0; Path=/";
+    private static final String DELIMITER = " ";
+    private static final String CONTENT_TYPE = "Content-Type: ";
+    private static final String TEXT_HTML = "text/html";
+    private static final String HTML_REQUEST_LINE = CONTENT_TYPE + TEXT_HTML + CARRIAGE_RETURN + CARRIAGE_RETURN;
+    private static final String INDEX_HTML = "static/index.html";
+    private static final String NEXT_LINE = "\n";
 
     @Override
     public void render(
@@ -45,44 +29,73 @@ public class StaticView implements View {
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
-//        res
+        response(request, response);
     }
 
-    private void response200Header(
-        OutputStream outputStream,
-        int lengthOfBodyContent,
-        String contentType
+    private void response(
+        HttpServletRequest request,
+        HttpServletResponse response
     ) throws IOException {
-        DataOutputStream dos = new DataOutputStream(outputStream);
-        dos.writeBytes("HTTP/1.1 200 OK " + CARRIAGE_RETURN);
-        dos.writeBytes("Content-Type: " + contentType + CARRIAGE_RETURN);
-        dos.writeBytes("Content-Length: " + lengthOfBodyContent + CARRIAGE_RETURN);
-        dos.writeBytes(CARRIAGE_RETURN);
+        setResponseHeader(request, response);
     }
 
-    private byte[] readStream(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int bytesRead;
-        while ((bytesRead = inputStream.read(buffer)) != -1) {
-            byteArrayOutputStream.write(buffer, 0, bytesRead);
-        }
-        return byteArrayOutputStream.toByteArray();
-    }
-
-    private void responseBody(
-        OutputStream outputStream,
-        byte[] body
+    private void setResponseHeader(
+        HttpServletRequest request,
+        HttpServletResponse response
     ) throws IOException {
-        outputStream.write(body);
-        outputStream.flush();
+        SocketChannel channel = response.getSocketChannel();
+        HttpStatus httpStatus = response.getStatus();
+        String header = getHeader(request, response);
+
+        ByteBuffer headerBuffer = ByteBuffer.wrap(header.getBytes(UTF_8));
+        channel.write(headerBuffer);
+
+        if (UN_AUTHORIZED.equals(httpStatus)) {
+            InputStream inputStream = getInputStream();
+            String htmlContent = readInputStream(inputStream);
+            ByteBuffer contentTypeBuffer = ByteBuffer.wrap(HTML_REQUEST_LINE.getBytes(UTF_8));
+            channel.write(contentTypeBuffer);
+
+            ByteBuffer htmlBuffer = ByteBuffer.wrap(htmlContent.getBytes(UTF_8));
+            channel.write(htmlBuffer);
+        }
     }
 
-    private String getContentType(String filePath) {
-        String contentType = URLConnection.guessContentTypeFromName(filePath);
-        if (contentType == null) {
-            contentType = "application/octet-stream";
+    private InputStream getInputStream() {
+        return getClass().getClassLoader()
+            .getResourceAsStream(INDEX_HTML);
+    }
+
+    private String getHeader(
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) {
+        HttpStatus httpStatus = response.getStatus();
+
+        StringBuilder headerBuilder = new StringBuilder();
+        headerBuilder.append(request.getHttpVersion())
+            .append(DELIMITER)
+            .append(httpStatus.getStatusCode())
+            .append(DELIMITER)
+            .append(httpStatus.getStatus())
+            .append(CARRIAGE_RETURN);
+
+        if (UN_AUTHORIZED.equals(httpStatus)) {
+            headerBuilder.append(INVALID_COOKIE)
+                .append(CARRIAGE_RETURN);
         }
-        return contentType;
+        return headerBuilder.toString();
+    }
+
+    private String readInputStream(InputStream inputStream) throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream, UTF_8);
+        try (BufferedReader reader = new BufferedReader(inputStreamReader)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line).append(NEXT_LINE);
+            }
+        }
+        return stringBuilder.toString();
     }
 }

@@ -9,10 +9,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Predicate;
 import project.server.app.core.domain.user.User;
 import project.server.app.core.domain.user.UserRepository;
 import project.server.app.core.web.user.exception.AlreadyRegisteredUserException;
-import static project.server.app.core.web.user.exception.UserErrorCodeAndMessage.ALREADY_SAVED_USER;
 import project.server.mvc.springframework.annotation.Repository;
 
 @Repository
@@ -49,7 +49,7 @@ public class UserPersistenceRepository implements UserRepository {
     @Override
     public boolean existByName(String username) {
         User findUser = factory.values().stream()
-            .filter(x -> x.getUsername().equals(username))
+            .filter(equalsUsername(username))
             .findAny()
             .orElseGet(() -> null);
         return findUser != null ? ALREADY_EXIST : NOT_FOUND;
@@ -62,7 +62,29 @@ public class UserPersistenceRepository implements UserRepository {
     }
 
     @Override
+    public Optional<User> findByUsernameAndPassword(
+        String username,
+        String password
+    ) {
+        return Optional.ofNullable(
+            factory.values().stream()
+                .filter(equalsUsername(username))
+                .filter(equalsPassword(password))
+                .findAny()
+                .orElseGet(() -> null)
+        );
+    }
+
+    @Override
     public void clear() {
         factory.clear();
+    }
+
+    private Predicate<User> equalsUsername(String username) {
+        return user -> user.getUsername().equals(username);
+    }
+
+    private Predicate<User> equalsPassword(String password) {
+        return user -> user.getPassword().equals(password);
     }
 }

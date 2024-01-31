@@ -7,8 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
 import project.server.mvc.servlet.Request;
@@ -16,9 +15,8 @@ import project.server.mvc.servlet.Response;
 import project.server.mvc.servlet.Servlet;
 import static project.server.mvc.springframework.context.ApplicationContextProvider.getBean;
 
+@Slf4j
 public final class RequestHandler extends Thread {
-
-    private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
     private final Servlet dispatcherServlet;

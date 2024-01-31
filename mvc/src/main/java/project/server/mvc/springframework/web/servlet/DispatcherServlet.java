@@ -1,22 +1,24 @@
 package project.server.mvc.springframework.web.servlet;
 
 import java.util.List;
-import project.server.mvc.springframework.web.servlet.mvc.method.RequestMappingHandlerMapping;
-import project.server.mvc.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
-import project.server.mvc.servlet.ServletException;
 import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
+import project.server.mvc.servlet.ServletException;
+import project.server.mvc.springframework.web.servlet.mvc.method.RequestMappingHandlerMapping;
+import project.server.mvc.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 public class DispatcherServlet extends FrameworkServlet {
 
     private final List<HandlerMapping> handlerMappings;
     private final List<HandlerAdapter> handlerAdapters;
     private final List<ViewResolver> viewResolvers;
+    private final GlobalExceptionHandler exceptionHandler;
 
     public DispatcherServlet() {
         this.handlerMappings = List.of(new RequestMappingHandlerMapping());
         this.handlerAdapters = List.of(new RequestMappingHandlerAdapter());
         this.viewResolvers = List.of(new BeanNameViewResolver());
+        this.exceptionHandler = new GlobalExceptionHandler();
     }
 
     @Override
@@ -36,14 +38,20 @@ public class DispatcherServlet extends FrameworkServlet {
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
-        HandlerExecutionChain handler = getHandler(request);
-        if (handler == null) {
-            return;
-        }
+        try {
+            HandlerExecutionChain handler = getHandler(request);
+            if (handler == null) {
+                return;
+            }
 
-        HandlerAdapter handlerAdapter = getHandlerAdapter(handler.getHandler());
-        ModelAndView modelAndView = handlerAdapter.handle(request, response, handler.getHandler());
-        processDispatchResult(request, response, modelAndView);
+            HandlerAdapter handlerAdapter = getHandlerAdapter(handler.getHandler());
+            ModelAndView modelAndView = handlerAdapter.handle(request, response, handler.getHandler());
+            processDispatchResult(request, response, modelAndView);
+        } catch (Exception exception) {
+            exceptionHandler.resolveException(response, exception);
+            StaticView view = new StaticView();
+            view.render(null, request, response);
+        }
     }
 
     private HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {

@@ -2,6 +2,7 @@ package project.server.mvc.servlet.http;
 
 import java.net.URLConnection;
 import java.util.Objects;
+import static project.server.mvc.servlet.http.HttpMethod.findHttpMethod;
 import static project.server.mvc.servlet.http.HttpVersion.findHttpVersion;
 
 public class RequestLine {
@@ -12,39 +13,61 @@ public class RequestLine {
     private static final String DELIMITER = " ";
     private static final String BASIC_PREFIX = "/";
     private static final String STATIC_HOME = "index.html";
+    private static final String OCTET_STREAM = "application/octet-stream";
 
     private final HttpMethod httpMethod;
-    private final RequestUri requestURI;
+    private final RequestUri requestUri;
     private final HttpVersion httpVersion;
     private String contentType;
 
     public RequestLine(String startLine) {
         String[] startLineArray = startLine.split(DELIMITER);
-        this.httpMethod = HttpMethod.findHttpMethod(startLineArray[METHOD]);
-        this.requestURI = getRequestUrl(startLine);
+        this.httpMethod = findHttpMethod(startLineArray[METHOD]);
+        this.requestUri = getRequestUri(startLine);
         this.httpVersion = findHttpVersion(startLineArray[VERSION]);
     }
 
-    private RequestUri getRequestUrl(String startLine) {
+    private RequestUri getRequestUri(String startLine) {
         String[] startLineArray = startLine.split(DELIMITER);
-        String requestFile = null;
+        RequestUri requestUri = getRequestUri(startLine, startLineArray);
+        if (requestUri != null) {
+            return requestUri;
+        }
+        return new RequestUri(startLineArray[URI]);
+    }
+
+    private RequestUri getRequestUri(
+        String startLine,
+        String[] startLineArray
+    ) {
+        String requestFile;
         if (!startLine.isEmpty()) {
-            if (startLineArray.length >= 2) {
-                requestFile = startLineArray[1].substring(1);
-                if (requestFile.isEmpty()) {
-                    requestFile = STATIC_HOME;
-                }
-            }
+            requestFile = getRequestFile(startLineArray);
             this.contentType = getContentType(requestFile);
             return new RequestUri(BASIC_PREFIX + requestFile);
         }
-        return new RequestUri(startLineArray[URI]);
+        return null;
+    }
+
+    private String getRequestFile(String[] startLineArray) {
+        String resultFile = null;
+        if (isStaticResource(startLineArray)) {
+            resultFile = startLineArray[URI].substring(1);
+            if (resultFile.isEmpty()) {
+                resultFile = STATIC_HOME;
+            }
+        }
+        return resultFile;
+    }
+
+    private boolean isStaticResource(String[] startLineArray) {
+        return startLineArray.length >= 2;
     }
 
     private String getContentType(String filePath) {
         String contentType = URLConnection.guessContentTypeFromName(filePath);
         if (contentType == null) {
-            contentType = "application/octet-stream";
+            contentType = OCTET_STREAM;
         }
         return contentType;
     }
@@ -53,8 +76,8 @@ public class RequestLine {
         return this.httpMethod;
     }
 
-    public String getRequestUrl() {
-        return requestURI.url();
+    public String getRequestUri() {
+        return requestUri.url();
     }
 
     public String getContentType() {
@@ -63,12 +86,16 @@ public class RequestLine {
 
     @Override
     public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
+        if (this == object) {
+            return true;
+        }
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
         RequestLine that = (RequestLine) object;
-        return httpMethod == that.httpMethod &&
-            requestURI.equals(that.requestURI) &&
-            httpVersion == that.httpVersion;
+        return httpMethod == that.httpMethod
+            && requestUri.equals(that.requestUri)
+            && httpVersion == that.httpVersion;
     }
 
     public String getHttpVersionAsString() {
@@ -82,6 +109,6 @@ public class RequestLine {
 
     @Override
     public String toString() {
-        return String.format("%s %s %s\r\n", httpMethod, requestURI, httpVersion.getValue());
+        return String.format("%s %s %s\r\n", httpMethod, requestUri, httpVersion.getValue());
     }
 }

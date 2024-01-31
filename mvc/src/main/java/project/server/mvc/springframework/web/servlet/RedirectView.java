@@ -1,12 +1,13 @@
 package project.server.mvc.springframework.web.servlet;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
-import static project.server.mvc.servlet.http.HttpStatus.MOVE_PERMANENTLY;
 
 public class RedirectView implements View {
 
@@ -17,9 +18,8 @@ public class RedirectView implements View {
     private static final String REDIRECT_LOCATION = "redirect:/index.html";
     private static final String HOME = "/index.html";
 
-    private final Map<String, View> views = new HashMap<>();
-
     public RedirectView() {
+        Map<String, View> views = new HashMap<>();
         views.put(REDIRECT_LOCATION, new StaticView());
     }
 
@@ -29,7 +29,6 @@ public class RedirectView implements View {
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
-        response.setStatus(MOVE_PERMANENTLY);
         response(request, response);
     }
 
@@ -40,16 +39,17 @@ public class RedirectView implements View {
         setResponseHeader(request, response);
     }
 
-    private void setResponseHeader(
-        HttpServletRequest request,
-        HttpServletResponse response
-    ) throws IOException {
-        DataOutputStream dos = new DataOutputStream(response.getOutputStream());
-        dos.writeBytes(getStartLine(request, response));
-        dos.writeBytes(LOCATION_DELIMITER + getRedirectLocation(request) + CARRIAGE_RETURN);
-        dos.writeBytes(CARRIAGE_RETURN);
-        dos.flush();
-        dos.close();
+    private void setResponseHeader(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        SocketChannel channel = response.getSocketChannel();
+        String header = getStartLine(request, response)
+            + LOCATION_DELIMITER + getRedirectLocation(request) + CARRIAGE_RETURN
+            + "Access-Control-Allow-Origin: *" + CARRIAGE_RETURN
+            + "Set-Cookie: " + response.getCookiesAsString() + CARRIAGE_RETURN
+            + CARRIAGE_RETURN;
+        ByteBuffer headerBuffer = ByteBuffer.wrap(header.getBytes(StandardCharsets.UTF_8));
+        while (headerBuffer.hasRemaining()) {
+            channel.write(headerBuffer);
+        }
     }
 
     private String getStartLine(

@@ -10,7 +10,15 @@ public final class UserFixture {
 
     public static User createUser() {
         return new User(
-            1L,
+            null,
+            "Steve-Jobs",
+            "HelloWorld145"
+        );
+    }
+
+    public static User createUser(Long userId) {
+        return new User(
+            userId,
             "Steve-Jobs",
             "HelloWorld145"
         );

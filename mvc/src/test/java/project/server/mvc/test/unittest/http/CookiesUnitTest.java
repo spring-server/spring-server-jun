@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import project.server.mvc.servlet.http.Cookie;
 import project.server.mvc.servlet.http.Cookies;
 
 @DisplayName("[UnitTest] 쿠키 단위 테스트")
@@ -21,6 +22,8 @@ class CookiesUnitTest {
     @DisplayName("쿠키 목록에 key를 넣으면 value 값이 나온다.")
     void cookieGetValueTest() {
         Cookies cookies = new Cookies(List.of("name=value"));
-        assertEquals("value", cookies.getValue("name"));
+        Cookie cookie = cookies.getValue("name");
+
+        assertEquals("value", cookie.value());
     }
 }
