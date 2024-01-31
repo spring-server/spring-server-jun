@@ -11,9 +11,9 @@ allprojects {
 }
 
 subprojects {
-    apply plugin: ("java")
-    apply plugin: ("checkstyle")
-    apply plugin: ("pmd")
+    apply(plugin: "java")
+    apply(plugin: "checkstyle")
+    apply(plugin: "pmd")
     apply(from: "${rootDir}/script/analysis/pmd.gradle")
     apply(from: "${rootDir}/script/analysis/checkstyle.gradle")
 
