@@ -5,6 +5,10 @@ plugins {
 
 dependencies {
     implementation(project(":mvc"))
+    implementation(project(":jdbc"))
+
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.1")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.13.1")
 }
 
 tasks.named("test") {

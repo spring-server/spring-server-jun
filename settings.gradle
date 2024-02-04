@@ -1,2 +1,2 @@
 rootProject.name = "spring-server"
-include("app", "mvc")
+include("app", "mvc", "jdbc")
