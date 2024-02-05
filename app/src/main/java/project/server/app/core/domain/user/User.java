@@ -13,6 +13,9 @@ public class User {
     private LocalDateTime lastModifiedAt;
     private Deleted deleted;
 
+    public User() {
+    }
+
     public User(
         String username,
         String password
@@ -68,12 +71,13 @@ public class User {
         return this.id == null;
     }
 
-    public void registerId(Long id) {
-        this.id = id;
-    }
-
     public boolean isAlreadyDeleted() {
         return this.deleted.equals(Deleted.TRUE);
+    }
+
+    public void delete(LocalDateTime lastModifiedAt) {
+        this.lastModifiedAt = lastModifiedAt;
+        this.deleted = Deleted.TRUE;
     }
 
     @Override
@@ -85,11 +89,6 @@ public class User {
             return false;
         }
         return getId().equals(user.getId());
-    }
-
-    public void delete(LocalDateTime lastModifiedAt) {
-        this.lastModifiedAt = lastModifiedAt;
-        this.deleted = Deleted.TRUE;
     }
 
     @Override
