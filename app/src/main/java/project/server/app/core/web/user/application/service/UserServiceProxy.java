@@ -70,7 +70,6 @@ public class UserServiceProxy implements UserSaveUseCase, UserSearchUseCase, Use
         try {
             return txManager.getTransaction(createTransactionDefinition(readOnly));
         } catch (Exception exception) {
-            exception.printStackTrace();
             throw new RuntimeException();
         }
     }
