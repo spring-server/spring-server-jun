@@ -9,16 +9,16 @@ import project.server.app.common.login.Session;
 import project.server.app.core.domain.user.User;
 import project.server.app.core.web.user.application.UserLoginUseCase;
 import project.server.app.core.web.user.application.UserSaveUseCase;
-import project.server.app.core.web.user.application.service.UserLoginService;
-import project.server.app.core.web.user.application.service.UserService;
+import project.server.app.core.web.user.application.service.UserLoginServiceProxy;
+import project.server.app.core.web.user.application.service.UserServiceProxy;
 import project.server.app.test.integrationtest.IntegrationTestBase;
 import static project.server.mvc.springframework.context.ApplicationContext.getBean;
 
 @DisplayName("[IntegrationTest] 로그인 통합 테스트")
 class UserLoginIntegrationTest extends IntegrationTestBase {
 
-    private final UserSaveUseCase userSaveUseCase = getBean(UserService.class);
-    private final UserLoginUseCase loginUseCase = getBean(UserLoginService.class);
+    private final UserSaveUseCase userSaveUseCase = getBean(UserServiceProxy.class);
+    private final UserLoginUseCase loginUseCase = getBean(UserLoginServiceProxy.class);
 
     @Test
     @DisplayName("정상적으로 로그인이 되면 세션이 발급된다.")

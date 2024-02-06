@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import project.server.app.core.domain.user.User;
 import project.server.app.core.web.user.application.UserSaveUseCase;
 import project.server.app.core.web.user.application.UserSearchUseCase;
-import project.server.app.core.web.user.application.service.UserService;
+import project.server.app.core.web.user.application.service.UserServiceProxy;
 import project.server.app.core.web.user.exception.UserNotFoundException;
 import project.server.app.test.integrationtest.IntegrationTestBase;
 import static project.server.mvc.springframework.context.ApplicationContext.getBean;
@@ -15,8 +15,8 @@ import static project.server.mvc.springframework.context.ApplicationContext.getB
 @DisplayName("[IntegrationTest] 사용자 조회 통합 테스트")
 class UserSearchIntegrationTest extends IntegrationTestBase {
 
-    private final UserSaveUseCase userSaveUseCase = getBean(UserService.class);
-    private final UserSearchUseCase userSearchUseCase = getBean(UserService.class);
+    private final UserSaveUseCase userSaveUseCase = getBean(UserServiceProxy.class);
+    private final UserSearchUseCase userSearchUseCase = getBean(UserServiceProxy.class);
 
     @Test
     @DisplayName("사용자가 저장되면 PK로 조회할 수 있다.")
