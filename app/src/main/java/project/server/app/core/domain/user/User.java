@@ -67,10 +67,6 @@ public class User {
         return deleted;
     }
 
-    public boolean isNew() {
-        return this.id == null;
-    }
-
     public boolean isAlreadyDeleted() {
         return this.deleted.equals(Deleted.TRUE);
     }
