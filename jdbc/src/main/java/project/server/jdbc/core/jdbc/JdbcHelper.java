@@ -6,6 +6,8 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import static java.time.format.DateTimeFormatter.ofPattern;
+import java.util.Arrays;
+import java.util.List;
 
 public final class JdbcHelper {
 
@@ -18,6 +20,10 @@ public final class JdbcHelper {
     private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static final String ENGLISH_ALPHA = "([a-z])([A-Z]+)";
     private static final String REPLACEMENT_A_TO_B = "$1_$2";
+
+    private static final List<String> ddl = Arrays.stream(Ddl.values())
+        .map(Enum::name)
+        .toList();
 
     private JdbcHelper() {
         throw new AssertionError("올바른 방식으로 생성자를 호출해주세요.");
@@ -97,5 +103,9 @@ public final class JdbcHelper {
 
     public static String getValue(Object value) {
         return value != null ? value.toString() : null;
+    }
+
+    public static boolean containsDdl(String fieldValue) {
+        return ddl.contains(fieldValue);
     }
 }

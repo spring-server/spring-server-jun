@@ -2,7 +2,6 @@ package project.server.jdbc.core;
 
 import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
-import project.server.jdbc.core.ConfigMap;
 
 public class DriverManager {
 

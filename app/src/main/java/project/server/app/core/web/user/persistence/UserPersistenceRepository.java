@@ -53,12 +53,19 @@ public class UserPersistenceRepository implements UserRepository {
 
     @Override
     @SneakyThrows
+    public void delete(User user) {
+        jdbcTemplate.updateField(User.class, user.getId(), "deleted", user.getDeleted());
+    }
+
+    @Override
+    @SneakyThrows
     public List<User> findAll() {
         return jdbcTemplate.findAll(User.class);
     }
 
     @Override
+    @SneakyThrows
     public void clear() {
-        factory.clear();
+        jdbcTemplate.truncate(User.class);
     }
 }

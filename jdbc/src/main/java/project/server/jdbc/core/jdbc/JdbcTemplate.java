@@ -7,11 +7,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javax.sql.DataSource;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import static project.server.jdbc.core.jdbc.JdbcHelper.containsDdl;
 import static project.server.jdbc.core.jdbc.JdbcHelper.convertCamelToSnake;
 import static project.server.jdbc.core.jdbc.JdbcHelper.convertValueToFieldType;
 import static project.server.jdbc.core.jdbc.JdbcHelper.createInsertSQL;
@@ -24,6 +27,7 @@ public class JdbcTemplate<T> extends JdbcAccessor implements JdbcOperations {
         super(dataSource);
     }
 
+    @SneakyThrows
     public T save(T entity) throws IllegalAccessException, SQLException {
         Class<?> clazz = entity.getClass();
         Field[] fields = clazz.getDeclaredFields();
@@ -31,7 +35,7 @@ public class JdbcTemplate<T> extends JdbcAccessor implements JdbcOperations {
 
         try (
             Connection conn = getDataSource().getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)
+            PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
         ) {
 
             int index = 1;
@@ -44,6 +48,17 @@ public class JdbcTemplate<T> extends JdbcAccessor implements JdbcOperations {
                 pstmt.setString(index++, getValue(value));
             }
             pstmt.executeUpdate();
+
+            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    long id = generatedKeys.getLong(1);
+                    Field idField = entity.getClass().getDeclaredField("id");
+                    idField.setAccessible(true);
+                    idField.set(entity, id);
+                } else {
+                    throw new SQLException("Sign-up failed.");
+                }
+            }
         }
         return entity;
     }
@@ -88,11 +103,42 @@ public class JdbcTemplate<T> extends JdbcAccessor implements JdbcOperations {
         }
     }
 
+    public boolean updateField(
+        Class<T> clazz,
+        Long id,
+        String fieldName,
+        Object fieldValue
+    ) throws SQLException {
+        String tableName = JdbcHelper.convertCamelToSnake(clazz.getSimpleName());
+        String columnName = JdbcHelper.convertCamelToSnake(fieldName);
+        String sql = "UPDATE " + tableName + " SET " + columnName + " = ? WHERE id = ?";
+
+        try (
+            Connection conn = getDataSource().getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)
+        ) {
+            pstmt.setObject(1, JdbcHelper.getValue(fieldValue)); // 값 변환 로직이 필요한 경우 추가 구현
+            pstmt.setLong(2, id);
+
+            int affectedRows = pstmt.executeUpdate();
+            return affectedRows > 0;
+        } catch (SQLException exception) {
+            log.error("Failed to update {} for {} with ID: {}", columnName, tableName, id, exception);
+            throw exception;
+        }
+    }
+
+
     public boolean existsByField(
         Class<T> clazz,
         String fieldName,
         String fieldValue
     ) throws SQLException {
+        if (containsDdl(fieldValue)) {
+            String message = String.format("Invalid parameter exception. FieldValue: %s", fieldValue);
+            throw new SQLException(message);
+        }
+
         String tableName = convertCamelToSnake(clazz.getSimpleName());
         String sql = new StringBuilder("SELECT COUNT(1) FROM ")
             .append(tableName)

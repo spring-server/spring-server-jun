@@ -31,8 +31,12 @@ public class UserService implements UserSaveUseCase, UserSearchUseCase, UserDele
 
     @Override
     public User findById(Long userId) {
-        return userRepository.findById(userId)
+        User findUser = userRepository.findById(userId)
             .orElseThrow(UserNotFoundException::new);
+        if (findUser.isAlreadyDeleted()) {
+            throw new UserNotFoundException();
+        }
+        return findUser;
     }
 
     @Override
@@ -45,5 +49,6 @@ public class UserService implements UserSaveUseCase, UserSearchUseCase, UserDele
         }
 
         findUser.delete(LocalDateTime.now());
+        userRepository.delete(findUser);
     }
 }

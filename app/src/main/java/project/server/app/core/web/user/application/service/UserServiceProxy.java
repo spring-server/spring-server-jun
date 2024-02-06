@@ -3,6 +3,7 @@ package project.server.app.core.web.user.application.service;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import project.server.app.common.configuration.DatabaseConfiguration;
+import project.server.app.common.exception.BusinessException;
 import project.server.app.common.login.LoginUser;
 import project.server.app.core.domain.user.User;
 import project.server.app.core.web.user.application.UserDeleteUseCase;
@@ -36,21 +37,15 @@ public class UserServiceProxy implements UserSaveUseCase, UserSearchUseCase, Use
             User newUser = target.save(user);
             txManager.commit(txStatus);
             return newUser;
-        } catch (Exception exception) {
+        } catch (BusinessException exception) {
             txManager.rollback(txStatus);
-            throw new RuntimeException();
+            throw exception;
         }
     }
 
     @Override
     public User findById(Long userId) {
-        TransactionStatus txStatus = getTransactionStatus(true);
-        log.info("txStatus:[{}]", txStatus.getTransaction());
-        try {
-            return target.findById(userId);
-        } catch (Exception exception) {
-            throw new RuntimeException();
-        }
+        return target.findById(userId);
     }
 
     @Override
@@ -60,9 +55,9 @@ public class UserServiceProxy implements UserSaveUseCase, UserSearchUseCase, Use
         try {
             target.delete(loginUser);
             txManager.commit(txStatus);
-        } catch (Exception exception) {
+        } catch (BusinessException exception) {
             txManager.rollback(txStatus);
-            throw new RuntimeException();
+            throw exception;
         }
     }
 

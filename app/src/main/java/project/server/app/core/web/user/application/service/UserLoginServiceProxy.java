@@ -3,6 +3,7 @@ package project.server.app.core.web.user.application.service;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import project.server.app.common.configuration.DatabaseConfiguration;
+import project.server.app.common.exception.BusinessException;
 import project.server.app.common.login.Session;
 import project.server.app.core.web.user.application.UserLoginUseCase;
 import static project.server.jdbc.core.transaction.DefaultTransactionDefinition.createTransactionDefinition;
@@ -36,6 +37,9 @@ public class UserLoginServiceProxy implements UserLoginUseCase {
             Session findSession = target.login(username, password);
             txManager.commit(txStatus);
             return findSession;
+        } catch (BusinessException exception) {
+            txManager.rollback(txStatus);
+            throw new RuntimeException();
         } catch (Exception exception) {
             txManager.rollback(txStatus);
             throw new RuntimeException();
@@ -44,11 +48,7 @@ public class UserLoginServiceProxy implements UserLoginUseCase {
 
     @Override
     public Session findSessionById(Long userId) {
-        try {
-            return target.findSessionById(userId);
-        } catch (Exception exception) {
-            throw new RuntimeException();
-        }
+        return target.findSessionById(userId);
     }
 
     private TransactionStatus getTransactionStatus(boolean readOnly) {
