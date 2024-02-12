@@ -21,7 +21,11 @@ public class UserService implements UserSaveUseCase, UserSearchUseCase, UserDele
     }
 
     @Override
-    public User save(User user) {
+    public Long save(
+        String username,
+        String password
+    ) {
+        User user = new User(username, password);
         boolean duplicatedUser = userRepository.existByName(user.getUsername());
         if (duplicatedUser) {
             throw new DuplicatedUsernameException();

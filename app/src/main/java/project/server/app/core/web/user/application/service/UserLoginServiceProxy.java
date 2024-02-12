@@ -6,6 +6,7 @@ import project.server.app.common.configuration.DatabaseConfiguration;
 import project.server.app.common.exception.BusinessException;
 import project.server.app.common.login.Session;
 import project.server.app.core.web.user.application.UserLoginUseCase;
+import project.server.jdbc.core.exception.DataAccessException;
 import static project.server.jdbc.core.transaction.DefaultTransactionDefinition.createTransactionDefinition;
 import project.server.jdbc.core.transaction.PlatformTransactionManager;
 import project.server.jdbc.core.transaction.TransactionStatus;
@@ -37,12 +38,9 @@ public class UserLoginServiceProxy implements UserLoginUseCase {
             Session findSession = target.login(username, password);
             txManager.commit(txStatus);
             return findSession;
-        } catch (BusinessException exception) {
+        } catch (BusinessException | DataAccessException exception) {
             txManager.rollback(txStatus);
-            throw new RuntimeException();
-        } catch (Exception exception) {
-            txManager.rollback(txStatus);
-            throw new RuntimeException();
+            throw exception;
         }
     }
 
@@ -55,6 +53,7 @@ public class UserLoginServiceProxy implements UserLoginUseCase {
         try {
             return txManager.getTransaction(createTransactionDefinition(readOnly));
         } catch (Exception exception) {
+            exception.printStackTrace();
             throw new RuntimeException();
         }
     }

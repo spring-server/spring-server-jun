@@ -13,9 +13,6 @@ public class User {
     private LocalDateTime lastModifiedAt;
     private Deleted deleted;
 
-    public User() {
-    }
-
     public User(
         String username,
         String password
@@ -61,6 +58,14 @@ public class User {
 
     public String getPassword() {
         return password.value();
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getLastModifiedAt() {
+        return lastModifiedAt;
     }
 
     public Deleted getDeleted() {

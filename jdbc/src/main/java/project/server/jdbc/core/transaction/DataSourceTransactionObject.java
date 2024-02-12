@@ -19,6 +19,10 @@ public class DataSourceTransactionObject {
         return connectionHolder.getConnection();
     }
 
+    public ConnectionHolder getConnectionHolder() {
+        return connectionHolder;
+    }
+
     public void setConnection(
         String uniqueId,
         Connection connection

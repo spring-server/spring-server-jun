@@ -2,6 +2,7 @@ package project.server.jdbc.core.transaction;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -11,7 +12,7 @@ public final class TransactionSynchronizationManager {
         throw new AssertionError("올바른 방식으로 생성자를 호출해주세요.");
     }
 
-    private static final ThreadLocal<Map<String, Object>> factory;
+    private static final ThreadLocal<Map<DataSource, Object>> factory;
 
     static {
         factory = new ThreadLocal<>();
@@ -19,16 +20,16 @@ public final class TransactionSynchronizationManager {
     }
 
     public static void bindResource(
-        String key,
-        DataSourceTransactionObject value
+        DataSource key,
+        Object value
     ) {
-        Map<String, Object> transactionMap = factory.get();
+        Map<DataSource, Object> transactionMap = factory.get();
         transactionMap.put(key, value);
         log.debug("Put {} into threadlocal.", key);
     }
 
-    public static void releaseResource(String key) {
-        Map<String, Object> transactionMap = factory.get();
+    public static void releaseResource(DataSource key) {
+        Map<DataSource, Object> transactionMap = factory.get();
         transactionMap.remove(key);
         log.debug("Remove {} from threadlocal.", key);
     }

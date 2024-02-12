@@ -2,13 +2,16 @@ package project.server.app.core.web.user.application.service;
 
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
+import static project.server.app.common.codeandmessage.failure.ErrorCodeAndMessages.INVALID_DATA_ACCESS;
 import project.server.app.common.configuration.DatabaseConfiguration;
 import project.server.app.common.exception.BusinessException;
+import project.server.app.common.exception.InvalidParameterException;
 import project.server.app.common.login.LoginUser;
 import project.server.app.core.domain.user.User;
 import project.server.app.core.web.user.application.UserDeleteUseCase;
 import project.server.app.core.web.user.application.UserSaveUseCase;
 import project.server.app.core.web.user.application.UserSearchUseCase;
+import project.server.jdbc.core.exception.DataAccessException;
 import static project.server.jdbc.core.transaction.DefaultTransactionDefinition.createTransactionDefinition;
 import project.server.jdbc.core.transaction.PlatformTransactionManager;
 import project.server.jdbc.core.transaction.TransactionStatus;
@@ -30,33 +33,55 @@ public class UserServiceProxy implements UserSaveUseCase, UserSearchUseCase, Use
     }
 
     @Override
-    public User save(User user) {
+    public Long save(
+        String username,
+        String password
+    ) {
         TransactionStatus txStatus = getTransactionStatus(false);
-        log.info("txStatus:[{}]", txStatus.getTransaction());
+        log.debug("txStatus:[{}]", txStatus.getTransaction());
         try {
-            User newUser = target.save(user);
+            Long userId = target.save(username, password);
             txManager.commit(txStatus);
-            return newUser;
-        } catch (BusinessException exception) {
+            log.debug("Transaction finished.");
+            return userId;
+        } catch (IllegalArgumentException exception) {
             txManager.rollback(txStatus);
+            log.error("InvalidParameter: {}", exception.getMessage());
+            throw new InvalidParameterException();
+        } catch (BusinessException | DataAccessException exception) {
+            txManager.rollback(txStatus);
+            log.error("Transaction failed.");
             throw exception;
         }
     }
 
     @Override
     public User findById(Long userId) {
-        return target.findById(userId);
+        TransactionStatus txStatus = getTransactionStatus(true);
+        log.debug("txStatus:[{}]", txStatus.getTransaction());
+        try {
+            User findUser = target.findById(userId);
+            txManager.commit(txStatus);
+            log.debug("Transaction finished.");
+            return findUser;
+        } catch (BusinessException | DataAccessException exception) {
+            txManager.rollback(txStatus);
+            log.error("Transaction failed.");
+            throw exception;
+        }
     }
 
     @Override
     public void delete(LoginUser loginUser) {
         TransactionStatus txStatus = getTransactionStatus(false);
-        log.info("txStatus:[{}]", txStatus.getTransaction());
+        log.debug("txStatus:[{}]", txStatus.getTransaction());
         try {
             target.delete(loginUser);
             txManager.commit(txStatus);
-        } catch (BusinessException exception) {
+            log.debug("Transaction finished.");
+        } catch (BusinessException | DataAccessException exception) {
             txManager.rollback(txStatus);
+            log.error("Transaction failed.");
             throw exception;
         }
     }
@@ -65,7 +90,8 @@ public class UserServiceProxy implements UserSaveUseCase, UserSearchUseCase, Use
         try {
             return txManager.getTransaction(createTransactionDefinition(readOnly));
         } catch (Exception exception) {
-            throw new RuntimeException();
+            log.error("TransactionStatus creation failed. ReadOnly: {}.", readOnly);
+            throw new BusinessException(INVALID_DATA_ACCESS);
         }
     }
 }

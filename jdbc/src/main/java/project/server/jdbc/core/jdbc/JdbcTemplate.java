@@ -1,264 +1,111 @@
 package project.server.jdbc.core.jdbc;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import static java.lang.reflect.Modifier.isStatic;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import javax.sql.DataSource;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import static project.server.jdbc.core.jdbc.JdbcHelper.containsDdl;
-import static project.server.jdbc.core.jdbc.JdbcHelper.convertCamelToSnake;
-import static project.server.jdbc.core.jdbc.JdbcHelper.convertValueToFieldType;
-import static project.server.jdbc.core.jdbc.JdbcHelper.createInsertSQL;
-import static project.server.jdbc.core.jdbc.JdbcHelper.getValue;
+import project.server.jdbc.core.exception.DataAccessException;
 
 @Slf4j
-public class JdbcTemplate<T> extends JdbcAccessor implements JdbcOperations {
+public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
     public JdbcTemplate(DataSource dataSource) {
         super(dataSource);
     }
 
-    @SneakyThrows
-    public T save(T entity) throws IllegalAccessException, SQLException {
-        Class<?> clazz = entity.getClass();
-        Field[] fields = clazz.getDeclaredFields();
-        String sql = createInsertSQL(clazz, fields);
+    @Override
+    public <T> T queryForObject(ConnectionCallback<T> action) {
+        try (Connection conn = getConnection()) {
+            return action.doInConnection(conn);
+        } catch (SQLException exception) {
+            log.error("SQLException: {}", exception.getMessage());
+            throw new DataAccessException();
+        }
+    }
 
-        try (
-            Connection conn = getDataSource().getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
-        ) {
-
-            int index = 1;
-            for (Field field : fields) {
-                if (isStatic(field.getModifiers()) || field.isSynthetic()) {
-                    continue;
-                }
-                field.setAccessible(true);
-                Object value = field.get(entity);
-                pstmt.setString(index++, getValue(value));
+    @Override
+    public <T> T queryForObject(
+        String sql,
+        PreparedStatementCallback<T> action
+    ) {
+        return queryForObject(conn -> {
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                return action.doInPreparedStatement(pstmt);
+            } catch (SQLException exception) {
+                log.error("SQLException: {}", exception.getMessage());
+                throw new DataAccessException();
             }
+        });
+    }
+
+    @Override
+    public <T> T queryForObject(
+        String sql,
+        PreparedStatementSetter pss,
+        ResultSetExtractor<T> rse
+    ) {
+        return queryForObject(sql, pstmt -> {
+            pss.setValues(pstmt);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rse.extractData(rs);
+            } catch (SQLException exception) {
+                log.error("SQLException: {}", exception.getMessage());
+                throw new DataAccessException();
+            }
+        });
+    }
+
+    @Override
+    public <T> List<T> queryForList(
+        String sql,
+        RowMapper<T> rowMapper,
+        Object... params
+    ) {
+        return queryForObject(
+            sql, pstmt ->
+                setParameters(pstmt, params), rs -> {
+                List<T> results = new ArrayList<>();
+                while (rs.next()) {
+                    results.add(rowMapper.mapRow(rs));
+                }
+                return results;
+            }
+        );
+    }
+
+    @Override
+    public void execute(String sql) {
+        try (
+            Connection conn = getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)
+        ) {
             pstmt.executeUpdate();
-
-            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    long id = generatedKeys.getLong(1);
-                    Field idField = entity.getClass().getDeclaredField("id");
-                    idField.setAccessible(true);
-                    idField.set(entity, id);
-                } else {
-                    throw new SQLException("Sign-up failed.");
-                }
-            }
-        }
-        return entity;
-    }
-
-    public T findById(
-        Class<T> clazz,
-        Long id
-    ) throws SQLException, InstantiationException, IllegalAccessException, NoSuchMethodException {
-        String sql = new StringBuilder("SELECT * FROM ")
-            .append(convertCamelToSnake(clazz.getSimpleName()))
-            .append(" WHERE id = ?")
-            .toString();
-
-        try (
-            Connection conn = getDataSource().getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)
-        ) {
-            pstmt.setLong(1, id);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    T entity = clazz.getDeclaredConstructor().newInstance();
-                    Field[] fields = clazz.getDeclaredFields();
-                    for (Field field : fields) {
-                        if (isStatic(field.getModifiers()) || field.isSynthetic()) {
-                            continue;
-                        }
-                        field.setAccessible(true);
-                        Object value = rs.getObject(convertCamelToSnake(field.getName()));
-                        if (value != null) {
-                            Object convertedValue = convertValueToFieldType(rs, field);
-                            field.set(entity, convertedValue);
-                        }
-                    }
-                    return entity;
-                } else {
-                    return null;
-                }
-            } catch (InvocationTargetException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    public boolean updateField(
-        Class<T> clazz,
-        Long id,
-        String fieldName,
-        Object fieldValue
-    ) throws SQLException {
-        String tableName = JdbcHelper.convertCamelToSnake(clazz.getSimpleName());
-        String columnName = JdbcHelper.convertCamelToSnake(fieldName);
-        String sql = "UPDATE " + tableName + " SET " + columnName + " = ? WHERE id = ?";
-
-        try (
-            Connection conn = getDataSource().getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)
-        ) {
-            pstmt.setObject(1, JdbcHelper.getValue(fieldValue)); // 값 변환 로직이 필요한 경우 추가 구현
-            pstmt.setLong(2, id);
-
-            int affectedRows = pstmt.executeUpdate();
-            return affectedRows > 0;
         } catch (SQLException exception) {
-            log.error("Failed to update {} for {} with ID: {}", columnName, tableName, id, exception);
-            throw exception;
+            log.error("SQLException: {}", exception.getMessage());
+            throw new DataAccessException();
         }
     }
 
-
-    public boolean existsByField(
-        Class<T> clazz,
-        String fieldName,
-        String fieldValue
-    ) throws SQLException {
-        if (containsDdl(fieldValue)) {
-            String message = String.format("Invalid parameter exception. FieldValue: %s", fieldValue);
-            throw new SQLException(message);
-        }
-
-        String tableName = convertCamelToSnake(clazz.getSimpleName());
-        String sql = new StringBuilder("SELECT COUNT(1) FROM ")
-            .append(tableName)
-            .append(" WHERE ")
-            .append(convertCamelToSnake(fieldName))
-            .append(" = ?")
-            .toString();
-
-        try (
-            Connection conn = getDataSource().getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)
-        ) {
-            pstmt.setString(1, fieldValue);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1) > 0;
-                } else {
-                    return false;
-                }
+    private void setParameters(
+        PreparedStatement pstmt,
+        Object... params
+    ) {
+        try {
+            for (int index = 0; index < params.length; index++) {
+                pstmt.setObject(index + 1, params[index]);
             }
-        }
-    }
-
-    public Optional<T> findByUsernameAndPassword(
-        Class<T> clazz,
-        String username,
-        String password
-    ) throws SQLException {
-        String sql = new StringBuilder("SELECT * FROM ")
-            .append(convertCamelToSnake(clazz.getSimpleName()))
-            .append(" WHERE username = ? AND password = ?")
-            .toString();
-
-        try (
-            Connection conn = getDataSource().getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)
-        ) {
-            pstmt.setString(1, username);
-            pstmt.setString(2, password);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    T entity = clazz.getDeclaredConstructor().newInstance();
-                    Field[] fields = clazz.getDeclaredFields();
-                    for (Field field : fields) {
-                        if (isStatic(field.getModifiers()) || field.isSynthetic()) {
-                            continue;
-                        }
-                        field.setAccessible(true);
-                        Object convertedValue = convertValueToFieldType(rs, field);
-                        field.set(entity, convertedValue);
-                    }
-                    return Optional.of(entity);
-                } else {
-                    return Optional.empty();
-                }
-            } catch (Exception exception) {
-                throw new SQLException("Entity instantiation error", exception);
-            }
-        }
-    }
-
-    public List<T> findAll(Class<T> clazz) throws SQLException {
-        String tableName = convertCamelToSnake(clazz.getSimpleName());
-        String sql = new StringBuilder("SELECT * FROM ")
-            .append(tableName)
-            .toString();
-
-        try (
-            Connection conn = getDataSource().getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            ResultSet rs = pstmt.executeQuery()
-        ) {
-            List<T> entities = new ArrayList<>();
-            while (rs.next()) {
-                try {
-                    T entity = clazz.getDeclaredConstructor().newInstance();
-                    Field[] fields = clazz.getDeclaredFields();
-                    for (Field field : fields) {
-                        if (isStatic(field.getModifiers()) || field.isSynthetic()) {
-                            continue;
-                        }
-                        field.setAccessible(true);
-                        Object value = rs.getObject(convertCamelToSnake(field.getName()));
-                        if (value != null) {
-                            Object convertedValue = convertValueToFieldType(rs, field);
-                            field.set(entity, convertedValue);
-                        }
-                    }
-                    entities.add(entity);
-                } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
-                         InvocationTargetException e) {
-                    throw new SQLException("Error instantiating entity", e);
-                }
-            }
-            return entities;
-        }
-    }
-
-    public void truncate(Class<T> clazz) throws SQLException {
-        String tableName = convertCamelToSnake(clazz.getSimpleName());
-        String sql = new StringBuilder("TRUNCATE TABLE ")
-            .append(tableName)
-            .toString();
-
-        try (
-            Connection conn = getDataSource().getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)
-        ) {
-            pstmt.execute();
-            log.info("Table: {}", tableName);
         } catch (SQLException exception) {
-            log.error("Exception: {}", tableName, exception);
-            throw exception;
+            log.error("SQLException: {}", exception.getMessage());
+            throw new DataAccessException();
         }
     }
 
     @Override
     public void afterPropertiesSet() {
-        log.info("Repository initialized.");
+        log.info("AfterProperties.");
     }
 }

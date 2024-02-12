@@ -2,27 +2,25 @@ package project.server.jdbc.core;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
-import project.server.jdbc.core.transaction.DataSourceTransactionObject;
-import project.server.jdbc.core.transaction.TransactionStatus;
 import static project.server.jdbc.core.transaction.TransactionSynchronizationManager.releaseResource;
 
 @Slf4j
 public final class DataSourceUtils {
 
     public static void releaseConnection(
-        Connection connection,
-        TransactionStatus status
+        DataSource dataSource,
+        Connection connection
     ) {
         try {
             doReleaseConnection(connection);
         } catch (SQLException exception) {
-            log.debug("Could not close JDBC Connection.", exception);
+            log.error("SQLException.", exception);
         } catch (Throwable exception) {
-            log.debug("Unexpected exception when closing JDBC Connection", exception);
+            log.error("Exception.", exception);
         } finally {
-            DataSourceTransactionObject txObject = (DataSourceTransactionObject) status.getTransaction();
-            releaseResource(txObject.getId());
+            releaseResource(dataSource);
         }
     }
 

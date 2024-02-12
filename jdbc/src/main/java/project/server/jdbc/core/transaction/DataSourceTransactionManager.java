@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import static project.server.jdbc.core.DataSourceUtils.releaseConnection;
+import project.server.jdbc.core.exception.DataAccessException;
 import static project.server.jdbc.core.transaction.TransactionSynchronizationManager.bindResource;
 
 @Slf4j
@@ -30,7 +31,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
         log.info("Set auto-commit false.");
         prepareConnectionForTransaction(connection, definition);
 
-        bindResource(definition.getId(), txObject);
+        bindResource(dataSource, txObject.getConnectionHolder());
     }
 
     private void prepareConnectionForTransaction(
@@ -50,9 +51,9 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
         try {
             connection.commit();
         } catch (Exception exception) {
-            throw new RuntimeException();
+            throw new DataAccessException();
         } finally {
-            releaseConnection(connection, status);
+            releaseConnection(dataSource, connection);
         }
     }
 
@@ -66,7 +67,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
         } catch (Exception exception) {
             throw new RuntimeException();
         } finally {
-            releaseConnection(connection, status);
+            releaseConnection(dataSource, connection);
             log.debug("Rollback, transaction failed.");
         }
     }

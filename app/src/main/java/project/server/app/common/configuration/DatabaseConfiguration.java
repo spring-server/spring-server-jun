@@ -1,7 +1,6 @@
 package project.server.app.common.configuration;
 
 import java.io.IOException;
-import project.server.app.core.domain.user.User;
 import project.server.jdbc.core.ConfigMap;
 import project.server.jdbc.core.DriverManager;
 import project.server.jdbc.core.jdbc.JdbcTemplate;
@@ -30,7 +29,7 @@ public class DatabaseConfiguration {
     }
 
     @Bean
-    public JdbcTemplate<User> jdbcTemplate() throws IOException {
-        return new JdbcTemplate<>(driverManager().getDataSource());
+    public JdbcTemplate jdbcTemplate() throws IOException {
+        return new JdbcTemplate(driverManager().getDataSource());
     }
 }
