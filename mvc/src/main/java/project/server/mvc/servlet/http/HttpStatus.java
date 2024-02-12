@@ -1,5 +1,8 @@
 package project.server.mvc.servlet.http;
 
+import java.util.Arrays;
+import java.util.function.Predicate;
+
 public enum HttpStatus {
     OK("200 OK", 200),
     NO_CONTENT("204 No Content", 204),
@@ -18,6 +21,17 @@ public enum HttpStatus {
     ) {
         this.status = status;
         this.statusCode = statusCode;
+    }
+
+    public static HttpStatus findByCode(int code) {
+        return Arrays.stream(values())
+            .filter(equals(code))
+            .findAny()
+            .orElseThrow(IllegalStateException::new);
+    }
+
+    private static Predicate<HttpStatus> equals(int code) {
+        return statusCode -> statusCode.getStatusCode() == code;
     }
 
     public String getStatus() {
