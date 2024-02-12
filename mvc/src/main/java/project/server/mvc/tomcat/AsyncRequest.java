@@ -25,7 +25,7 @@ public class AsyncRequest implements Runnable {
 
     private final SocketChannel socketChannel;
     private final ByteBuffer buffer;
-    private final DispatcherServlet dispatcherServlet;
+    private final DispatcherServlet dispatcherServlet = getBean("dispatcherServlet");
 
     public AsyncRequest(
         SocketChannel socketChannel,
@@ -33,7 +33,6 @@ public class AsyncRequest implements Runnable {
     ) {
         this.socketChannel = socketChannel;
         this.buffer = buffer;
-        this.dispatcherServlet = getBean("dispatcherServlet");
     }
 
     @Override

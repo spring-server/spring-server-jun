@@ -3,12 +3,17 @@ package project.server.mvc;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
+import static java.nio.channels.SelectionKey.OP_READ;
+import static java.nio.channels.SelectionKey.OP_WRITE;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import project.server.mvc.tomcat.AsyncRequest;
@@ -22,6 +27,7 @@ public class Acceptor implements Runnable {
 
     private final Selector selector;
     private final Nio2EndPoint nio2EndPoint;
+    private final ExecutorService service = Executors.newFixedThreadPool(32);
 
     public Acceptor(
         int port,
@@ -46,14 +52,14 @@ public class Acceptor implements Runnable {
             selector.select();
             Set<SelectionKey> selectedKeys = selector.selectedKeys();
             Iterator<SelectionKey> keys = selectedKeys.iterator();
-
             while (keys.hasNext()) {
                 SelectionKey key = keys.next();
-
                 if (key.isAcceptable()) {
                     acceptSocket(key, selector);
                 } else if (key.isReadable()) {
                     read(key);
+                } else if (key.isWritable()) {
+                    write(key);
                 }
                 keys.remove();
             }
@@ -67,7 +73,7 @@ public class Acceptor implements Runnable {
         ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
         SocketChannel socketChannel = serverChannel.accept();
         socketChannel.configureBlocking(false);
-        socketChannel.register(selector, SelectionKey.OP_READ);
+        socketChannel.register(selector, OP_READ);
     }
 
     private void read(SelectionKey key) throws Exception {
@@ -77,11 +83,18 @@ public class Acceptor implements Runnable {
         if (bytesRead == FINISHED) {
             socketChannel.close();
             log.info("Connection closed by client.");
-            return;
         }
 
         buffer.flip();
-        new AsyncRequest(socketChannel, buffer)
-            .run();
+        AsyncRequest request = new AsyncRequest(socketChannel, buffer);
+        service.submit(request);
+
+        socketChannel.register(selector, OP_WRITE);
+        key.attach(request);
+    }
+
+    private void write(SelectionKey key) throws ClosedChannelException {
+        SocketChannel socketChannel = (SocketChannel) key.channel();
+        socketChannel.register(selector, OP_READ);
     }
 }

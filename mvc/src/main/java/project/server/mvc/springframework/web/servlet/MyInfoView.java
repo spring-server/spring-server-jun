@@ -56,7 +56,10 @@ public class MyInfoView implements View {
         int lengthOfBodyContent
     ) throws IOException {
         SocketChannel channel = response.getSocketChannel();
-        String header = request.getHttpVersion() + DELIMITER + getStatus(response) + CARRIAGE_RETURN
+        String header = request.getHttpVersion()
+            + DELIMITER
+            + getStatus(response)
+            + CARRIAGE_RETURN
             + CONTENT_TYPE
             + request.getContentType()
             + CARRIAGE_RETURN
