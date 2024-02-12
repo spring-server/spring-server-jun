@@ -2,7 +2,6 @@ package project.server.app.core.web.user.application.service;
 
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
-import static project.server.app.common.codeandmessage.failure.ErrorCodeAndMessages.INVALID_DATA_ACCESS;
 import project.server.app.common.configuration.DatabaseConfiguration;
 import project.server.app.common.exception.BusinessException;
 import project.server.app.common.exception.InvalidParameterException;
@@ -46,11 +45,11 @@ public class UserServiceProxy implements UserSaveUseCase, UserSearchUseCase, Use
             return userId;
         } catch (IllegalArgumentException exception) {
             txManager.rollback(txStatus);
-            log.error("InvalidParameter: {}", exception.getMessage());
+            log.error("{}", exception.getMessage());
             throw new InvalidParameterException();
         } catch (BusinessException | DataAccessException exception) {
             txManager.rollback(txStatus);
-            log.error("Transaction failed.");
+            log.error("{}", exception.getMessage());
             throw exception;
         }
     }
@@ -66,7 +65,7 @@ public class UserServiceProxy implements UserSaveUseCase, UserSearchUseCase, Use
             return findUser;
         } catch (BusinessException | DataAccessException exception) {
             txManager.rollback(txStatus);
-            log.error("Transaction failed.");
+            log.error("{}", exception.getMessage());
             throw exception;
         }
     }
@@ -81,7 +80,7 @@ public class UserServiceProxy implements UserSaveUseCase, UserSearchUseCase, Use
             log.debug("Transaction finished.");
         } catch (BusinessException | DataAccessException exception) {
             txManager.rollback(txStatus);
-            log.error("Transaction failed.");
+            log.error("{}", exception.getMessage());
             throw exception;
         }
     }
@@ -90,8 +89,8 @@ public class UserServiceProxy implements UserSaveUseCase, UserSearchUseCase, Use
         try {
             return txManager.getTransaction(createTransactionDefinition(readOnly));
         } catch (Exception exception) {
-            log.error("TransactionStatus creation failed. ReadOnly: {}.", readOnly);
-            throw new BusinessException(INVALID_DATA_ACCESS);
+            log.error("{}", exception.getMessage());
+            throw new DataAccessException();
         }
     }
 }

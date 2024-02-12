@@ -39,6 +39,7 @@ public class UserLoginServiceProxy implements UserLoginUseCase {
             txManager.commit(txStatus);
             return findSession;
         } catch (BusinessException | DataAccessException exception) {
+            log.error("{}", exception.getMessage());
             txManager.rollback(txStatus);
             throw exception;
         }
@@ -53,6 +54,7 @@ public class UserLoginServiceProxy implements UserLoginUseCase {
         try {
             return txManager.getTransaction(createTransactionDefinition(readOnly));
         } catch (Exception exception) {
+            log.error("{}", exception.getMessage());
             throw new DataAccessException();
         }
     }
