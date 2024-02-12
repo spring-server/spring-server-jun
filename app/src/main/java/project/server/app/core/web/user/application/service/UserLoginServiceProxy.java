@@ -53,8 +53,7 @@ public class UserLoginServiceProxy implements UserLoginUseCase {
         try {
             return txManager.getTransaction(createTransactionDefinition(readOnly));
         } catch (Exception exception) {
-            exception.printStackTrace();
-            throw new RuntimeException();
+            throw new DataAccessException();
         }
     }
 }
