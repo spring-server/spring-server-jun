@@ -7,11 +7,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import project.server.app.common.exception.BusinessException;
 import project.server.app.core.domain.user.User;
-import project.server.app.core.domain.user.UserRepository;
 import project.server.app.core.web.user.application.UserSaveUseCase;
 import project.server.app.core.web.user.application.service.UserServiceProxy;
 import project.server.app.core.web.user.exception.DuplicatedUsernameException;
-import project.server.app.core.web.user.persistence.UserPersistenceRepository;
 import project.server.app.test.integrationtest.IntegrationTestBase;
 import static project.server.mvc.springframework.context.ApplicationContext.getBean;
 
@@ -20,15 +18,14 @@ import static project.server.mvc.springframework.context.ApplicationContext.getB
 class UserSaveIntegrationTest extends IntegrationTestBase {
 
     private final UserSaveUseCase userSaveUseCase = getBean(UserServiceProxy.class);
-    private final UserRepository userRepository = getBean(UserPersistenceRepository.class);
 
     @Test
     @DisplayName("사용자가 저장되면 PK가 생성된다.")
     void userSaveTest() {
         User newUser = new User("Steve-Jobs", "helloworld");
-        User savedUser = userSaveUseCase.save(newUser);
+        Long userId = userSaveUseCase.save(newUser);
 
-        assertNotNull(savedUser.getId());
+        assertNotNull(userId);
     }
 
     @Test
