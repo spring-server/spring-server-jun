@@ -1,9 +1,9 @@
 package project.server.app.core.web.user.presentation;
 
 import lombok.extern.slf4j.Slf4j;
-import static project.server.app.common.utils.HeaderUtils.getSessionId;
 import project.server.app.common.login.LoginUser;
 import project.server.app.common.login.Session;
+import static project.server.app.common.utils.HeaderUtils.getSessionId;
 import project.server.app.core.domain.user.User;
 import project.server.app.core.web.user.application.UserLoginUseCase;
 import project.server.app.core.web.user.application.UserSearchUseCase;
@@ -44,9 +44,11 @@ public class UserInfoSearchController implements Handler {
         HttpServletResponse response
     ) {
         Long sessionId = getSessionId(request.getCookies());
-        validator.validateSessionId(sessionId);
+        validator.validateSessionId(sessionId, response);
 
         Session findSession = loginUseCase.findSessionById(sessionId);
+        validator.validateSession(findSession, response);
+
         log.info("Session:{}", findSession);
         LoginUser loginUser = new LoginUser(findSession);
 

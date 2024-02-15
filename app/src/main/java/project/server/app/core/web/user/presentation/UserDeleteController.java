@@ -38,7 +38,7 @@ public class UserDeleteController implements Handler {
         HttpServletResponse response
     ) {
         Long sessionId = getSessionId(request.getCookies());
-        validator.validateSessionId(sessionId);
+        validator.validateSessionId(sessionId, response);
 
         Session findSession = loginUseCase.findSessionById(sessionId);
         log.info("Session:{}", findSession);

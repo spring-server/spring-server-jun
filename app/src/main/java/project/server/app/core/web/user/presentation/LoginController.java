@@ -16,6 +16,8 @@ import project.server.mvc.springframework.web.servlet.ModelAndView;
 @Controller
 public class LoginController implements Handler {
 
+    private static final String MAX_AGE = "; Max-Age=900";
+
     private final UserValidator validator;
     private final UserLoginUseCase userLoginUseCase;
 
@@ -47,7 +49,7 @@ public class LoginController implements Handler {
         HttpServletResponse response,
         Session session
     ) {
-        Cookie cookie = new Cookie("sessionId", session.getUserIdAsString());
+        Cookie cookie = new Cookie("sessionId", session.getUserIdAsString() + MAX_AGE);
         response.addCookie(cookie);
         response.setStatus(MOVE_PERMANENTLY);
     }
