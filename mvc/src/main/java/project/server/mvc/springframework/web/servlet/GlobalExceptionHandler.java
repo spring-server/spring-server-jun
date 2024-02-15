@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import project.server.mvc.servlet.HttpServletResponse;
 import project.server.mvc.servlet.http.HttpStatus;
+import static project.server.mvc.servlet.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import project.server.mvc.springframework.annotation.Component;
 import project.server.mvc.springframework.exception.ErrorResponse;
 
@@ -19,6 +20,10 @@ public class GlobalExceptionHandler {
         Exception exception
     ) throws JsonProcessingException {
         Throwable cause = exception.getCause();
+        if (cause == null) {
+            response.setStatus(INTERNAL_SERVER_ERROR);
+            return;
+        }
         String stringJson = cause.toString();
         ErrorResponse errorResponse = objectMapper.readValue(stringJson, ErrorResponse.class);
 

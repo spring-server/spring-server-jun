@@ -1,22 +1,27 @@
 package project.server.mvc.springframework.web.servlet;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
-import java.nio.charset.StandardCharsets;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import static java.lang.String.valueOf;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import java.util.HashMap;
 import java.util.Map;
 import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
+import static project.server.mvc.servlet.http.HttpStatus.MOVE_PERMANENTLY;
 
 public class RedirectView implements View {
 
-    private static final String CARRIAGE_RETURN = "\r\n";
     private static final String PROTOCOL = "http://";
-    private static final String DELIMITER = " ";
-    private static final String LOCATION_DELIMITER = "Location: ";
+    private static final String LOCATION_DELIMITER = "Location";
     private static final String REDIRECT_LOCATION = "redirect:/index.html";
-    private static final String HOME = "/index.html";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String INDEX_HTML = "/index.html";
+    private static final String SIGN_IN_HTML = "static/sign-in.html";
+    private static final String TEXT_HTML = "text/html";
 
     public RedirectView() {
         Map<String, View> views = new HashMap<>();
@@ -29,41 +34,44 @@ public class RedirectView implements View {
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
-        response(request, response);
-    }
-
-    private void response(
-        HttpServletRequest request,
-        HttpServletResponse response
-    ) throws IOException {
-        setResponseHeader(request, response);
-    }
-
-    private void setResponseHeader(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        SocketChannel channel = response.getSocketChannel();
-        String header = getStartLine(request, response)
-            + LOCATION_DELIMITER + getRedirectLocation(request) + CARRIAGE_RETURN
-            + "Access-Control-Allow-Origin: *" + CARRIAGE_RETURN
-            + "Set-Cookie: " + response.getCookiesAsString() + CARRIAGE_RETURN
-            + CARRIAGE_RETURN;
-        ByteBuffer headerBuffer = ByteBuffer.wrap(header.getBytes(StandardCharsets.UTF_8));
-        while (headerBuffer.hasRemaining()) {
-            channel.write(headerBuffer);
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        if (MOVE_PERMANENTLY.equals(response.getStatus())) {
+            response.setHeader(LOCATION_DELIMITER, getRedirectLocation(request));
+            return;
         }
-    }
-
-    private String getStartLine(
-        HttpServletRequest request,
-        HttpServletResponse response
-    ) {
-        return String.format("%s%s%s%s", request.getHttpVersion(), DELIMITER, getStatus(response), CARRIAGE_RETURN);
-    }
-
-    private static String getStatus(HttpServletResponse response) {
-        return String.format("%s%s", response.getStatusAsString(), DELIMITER);
+        InputStream inputStream = getInputStream();
+        byte[] buffer = getBuffer(inputStream);
+        setResponseHeader(response, buffer.length);
+        response.setBody(new String(buffer));
     }
 
     private String getRedirectLocation(HttpServletRequest request) {
-        return String.format("%s%s%s", PROTOCOL, request.getHost(), HOME);
+        return String.format("%s%s%s", PROTOCOL, request.getHost(), INDEX_HTML);
+    }
+
+    private InputStream getInputStream() {
+        return getClass().getClassLoader()
+            .getResourceAsStream(SIGN_IN_HTML);
+    }
+
+    private byte[] getBuffer(InputStream inputStream) throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream, UTF_8);
+        try (BufferedReader reader = new BufferedReader(inputStreamReader)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line).append("\n");
+            }
+        }
+        return stringBuilder.toString()
+            .getBytes();
+    }
+
+    private void setResponseHeader(
+        HttpServletResponse response,
+        long lengthOfBodyContent
+    ) {
+        response.setHeader(CONTENT_TYPE, TEXT_HTML);
+        response.setHeader(CONTENT_LENGTH, valueOf(lengthOfBodyContent));
     }
 }

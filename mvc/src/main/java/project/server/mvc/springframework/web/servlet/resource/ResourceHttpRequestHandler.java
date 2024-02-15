@@ -13,13 +13,12 @@ import project.server.mvc.springframework.web.HttpRequestHandler;
 
 public class ResourceHttpRequestHandler implements HttpRequestHandler {
 
-    private static final String CARRIAGE_RETURN = "\r\n";
     private static final int BASE_OFFSET = 0;
     private static final int START_INDEX = 1;
     private static final int EMPTY = -1;
-    private static final String CONTENT_LENGTH = "Content-Length: ";
-    private static final String CONTENT_TYPE = "Content-Type: ";
-    private static final String DELIMITER = " ";
+    private static final int BUFFER_CAPACITY = 1_024;
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String CONTENT_TYPE = "Content-Type";
     private static final String HTML = ".html";
     private static final String STATIC_PREFIX = "static";
 
@@ -60,7 +59,8 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler {
     }
 
     private InputStream getInputStream(String path) {
-        return getClass().getClassLoader().getResourceAsStream(path);
+        return getClass().getClassLoader()
+            .getResourceAsStream(path);
     }
 
     private void response(
@@ -68,16 +68,16 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler {
         HttpServletResponse response,
         InputStream inputStream
     ) throws IOException {
-        byte[] buffer = readStream(inputStream);
+        byte[] buffer = readInputStream(inputStream);
         setResponseHeader(request, response, buffer.length);
-        responseBody(response, buffer);
+        setResponseBody(response, buffer);
     }
 
     private void responsePageNotFound(HttpServletResponse response) {
         response.setStatus(NOT_FOUND);
     }
 
-    private void responseBody(
+    private void setResponseBody(
         HttpServletResponse response,
         byte[] body
     ) throws IOException {
@@ -94,30 +94,20 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler {
         int lengthOfBodyContent
     ) throws IOException {
         SocketChannel channel = response.getSocketChannel();
-        String header = request.getHttpVersion()
-            + DELIMITER
-            + getStatus(response)
-            + CARRIAGE_RETURN
-            + CONTENT_TYPE
-            + request.getContentType()
-            + CARRIAGE_RETURN
-            + CONTENT_LENGTH
-            + lengthOfBodyContent
-            + CARRIAGE_RETURN
-            + CARRIAGE_RETURN;
+        response.getHttpHeaderLine();
+        response.setHeader(CONTENT_TYPE, request.getContentType());
+        response.setHeader(CONTENT_LENGTH, String.valueOf(lengthOfBodyContent));
+
+        String header = response.getHttpHeaderLine();
         ByteBuffer headerBuffer = ByteBuffer.wrap(header.getBytes(UTF_8));
         while (headerBuffer.hasRemaining()) {
             channel.write(headerBuffer);
         }
     }
 
-    private static String getStatus(HttpServletResponse response) {
-        return response.getStatusAsString() + DELIMITER;
-    }
-
-    private byte[] readStream(InputStream inputStream) throws IOException {
+    private byte[] readInputStream(InputStream inputStream) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
+        byte[] buffer = new byte[BUFFER_CAPACITY];
         int bytesRead;
         while ((bytesRead = inputStream.read(buffer)) != EMPTY) {
             byteArrayOutputStream.write(buffer, BASE_OFFSET, bytesRead);

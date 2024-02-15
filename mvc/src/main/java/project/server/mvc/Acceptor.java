@@ -13,8 +13,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import lombok.SneakyThrows;
+import static java.util.concurrent.Executors.newFixedThreadPool;
 import lombok.extern.slf4j.Slf4j;
 import project.server.mvc.tomcat.AsyncRequest;
 import project.server.mvc.tomcat.Nio2EndPoint;
@@ -22,12 +21,12 @@ import project.server.mvc.tomcat.Nio2EndPoint;
 @Slf4j
 public class Acceptor implements Runnable {
 
-    private static final int FINISHED = -1;
+    private static final int FIXED_THREAD_COUNT = 32;
     private static final int BUFFER_CAPACITY = 1024;
 
     private final Selector selector;
     private final Nio2EndPoint nio2EndPoint;
-    private final ExecutorService service = Executors.newFixedThreadPool(32);
+    private final ExecutorService service = newFixedThreadPool(FIXED_THREAD_COUNT);
 
     public Acceptor(
         int port,
@@ -46,22 +45,25 @@ public class Acceptor implements Runnable {
     }
 
     @Override
-    @SneakyThrows
     public void run() {
         while (true) {
-            selector.select();
-            Set<SelectionKey> selectedKeys = selector.selectedKeys();
-            Iterator<SelectionKey> keys = selectedKeys.iterator();
-            while (keys.hasNext()) {
-                SelectionKey key = keys.next();
-                if (key.isAcceptable()) {
-                    acceptSocket(key, selector);
-                } else if (key.isReadable()) {
-                    read(key);
-                } else if (key.isWritable()) {
-                    write(key);
+            try {
+                selector.select();
+                Set<SelectionKey> selectedKeys = selector.selectedKeys();
+                Iterator<SelectionKey> keys = selectedKeys.iterator();
+                while (keys.hasNext()) {
+                    SelectionKey key = keys.next();
+                    if (key.isAcceptable()) {
+                        acceptSocket(key, selector);
+                    } else if (key.isReadable()) {
+                        read(key);
+                    } else if (key.isWritable()) {
+                        write(key);
+                    }
+                    keys.remove();
                 }
-                keys.remove();
+            } catch (IOException exception) {
+                throw new RuntimeException(exception);
             }
         }
     }
@@ -69,32 +71,41 @@ public class Acceptor implements Runnable {
     private void acceptSocket(
         SelectionKey key,
         Selector selector
-    ) throws IOException {
+    ) {
         ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
-        SocketChannel socketChannel = serverChannel.accept();
-        socketChannel.configureBlocking(false);
-        socketChannel.register(selector, OP_READ);
-    }
-
-    private void read(SelectionKey key) throws Exception {
-        SocketChannel socketChannel = (SocketChannel) key.channel();
-        ByteBuffer buffer = ByteBuffer.allocate(BUFFER_CAPACITY);
-        int bytesRead = socketChannel.read(buffer);
-        if (bytesRead == FINISHED) {
-            socketChannel.close();
-            log.info("Connection closed by client.");
+        try {
+            SocketChannel socketChannel = serverChannel.accept();
+            socketChannel.configureBlocking(false);
+            socketChannel.register(selector, OP_READ);
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
         }
-
-        buffer.flip();
-        AsyncRequest request = new AsyncRequest(socketChannel, buffer);
-        service.submit(request);
-
-        socketChannel.register(selector, OP_WRITE);
-        key.attach(request);
     }
 
-    private void write(SelectionKey key) throws ClosedChannelException {
+    private void read(SelectionKey key) {
+        log.debug("READ");
+        try {
+            SocketChannel socketChannel = (SocketChannel) key.channel();
+            ByteBuffer buffer = ByteBuffer.allocate(BUFFER_CAPACITY);
+            socketChannel.read(buffer);
+            AsyncRequest request = new AsyncRequest(socketChannel, buffer);
+            buffer.flip();
+
+            socketChannel.register(selector, OP_WRITE);
+            key.attach(request);
+        } catch (IOException exception) {
+
+        }
+    }
+
+    private void write(SelectionKey key) {
+        log.debug("WRITE");
         SocketChannel socketChannel = (SocketChannel) key.channel();
-        socketChannel.register(selector, OP_READ);
+        service.submit((Runnable) key.attachment());
+        try {
+            socketChannel.register(selector, OP_READ);
+        } catch (ClosedChannelException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

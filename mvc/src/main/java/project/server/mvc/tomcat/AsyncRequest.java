@@ -1,8 +1,8 @@
 package project.server.mvc.tomcat;
 
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +26,7 @@ public class AsyncRequest implements Runnable {
     private final SocketChannel socketChannel;
     private final ByteBuffer buffer;
     private final DispatcherServlet dispatcherServlet = getBean("dispatcherServlet");
+    private HttpServletResponse response;
 
     public AsyncRequest(
         SocketChannel socketChannel,
@@ -50,14 +51,17 @@ public class AsyncRequest implements Runnable {
 
             String requestBody = getRequestBodyBuilder(lines, index);
 
-            try (SocketChannel channel = this.socketChannel;
-                 OutputStream outputStream = channel.socket().getOutputStream()) {
-
+            try (SocketChannel channel = this.socketChannel) {
                 HttpServletRequest request = createHttpServletRequest(lines, headerLines, requestBody);
-                HttpServletResponse response = new Response(channel, outputStream);
+                HttpServletResponse response = new Response(channel);
+                this.response = response;
                 dispatcherServlet.service(request, response);
-            }
 
+                ByteBuffer headerBuffer = ByteBuffer.wrap(response.toString().getBytes(UTF_8));
+                while (headerBuffer.hasRemaining()) {
+                    channel.write(headerBuffer);
+                }
+            }
         } catch (Exception exception) {
             log.error("message: {}", exception.getMessage());
         }
@@ -87,5 +91,9 @@ public class AsyncRequest implements Runnable {
             new HttpHeaders(headerLines),
             new RequestBody(requestBody)
         );
+    }
+
+    public HttpServletResponse getResponse() {
+        return response;
     }
 }
