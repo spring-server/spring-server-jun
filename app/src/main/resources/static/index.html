@@ -163,9 +163,9 @@
 
         const sessionId = getCookie('sessionId');
         localStorage.setItem("logined", sessionId ? "true" : "false");
-        var logined = localStorage.getItem("logined");
+        const logined = localStorage.getItem("logined");
         if (logined === "true") {
-            var signInMenu = document.querySelector('.navbar__menu li a[href="/sign-in.html"]');
+            const signInMenu = document.querySelector('.navbar__menu li a[href="/sign-in.html"]');
             if (signInMenu) {
                 signInMenu.textContent = "My";
                 signInMenu.setAttribute('href', '/my-info.html');
