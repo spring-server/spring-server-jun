@@ -6,11 +6,11 @@ import project.server.app.core.web.user.application.UserLoginUseCase;
 import project.server.app.core.web.user.presentation.validator.UserValidator;
 import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
+import project.server.mvc.servlet.http.Cookie;
+import static project.server.mvc.servlet.http.HttpStatus.MOVE_PERMANENTLY;
 import project.server.mvc.springframework.annotation.Controller;
 import project.server.mvc.springframework.web.servlet.Handler;
 import project.server.mvc.springframework.web.servlet.ModelAndView;
-import project.server.mvc.servlet.http.Cookie;
-import static project.server.mvc.servlet.http.HttpStatus.OK;
 
 @Slf4j
 @Controller
@@ -49,6 +49,6 @@ public class LoginController implements Handler {
     ) {
         Cookie cookie = new Cookie("sessionId", session.getUserIdAsString());
         response.addCookie(cookie);
-        response.setStatus(OK);
+        response.setStatus(MOVE_PERMANENTLY);
     }
 }
