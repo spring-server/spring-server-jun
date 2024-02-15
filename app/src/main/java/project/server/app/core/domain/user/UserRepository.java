@@ -10,7 +10,7 @@ public interface UserRepository {
 
     void clear();
 
-    boolean existByName(String username);
+    boolean existsByName(String username);
 
     Optional<User> findByUsernameAndPassword(String username, String password);
 

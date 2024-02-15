@@ -26,7 +26,7 @@ public class UserService implements UserSaveUseCase, UserSearchUseCase, UserDele
         String password
     ) {
         User user = new User(username, password);
-        boolean duplicatedUser = userRepository.existByName(user.getUsername());
+        boolean duplicatedUser = userRepository.existsByName(user.getUsername());
         if (duplicatedUser) {
             throw new DuplicatedUsernameException();
         }

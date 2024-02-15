@@ -67,7 +67,7 @@ public class UserPersistenceRepository implements UserRepository {
     }
 
     @Override
-    public boolean existByName(String username) {
+    public boolean existsByName(String username) {
         String sql = selectBy(User.class, "username");
         return jdbcTemplate.queryForObject(sql, pstmt ->
                 pstmt.setString(1, username),
