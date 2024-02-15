@@ -1,13 +1,14 @@
 package project.server.mvc.springframework.web.servlet;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import static java.lang.String.valueOf;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
+import project.server.mvc.servlet.http.HttpStatus;
+import static project.server.mvc.servlet.http.HttpStatus.UN_AUTHORIZED;
 import project.server.mvc.springframework.ui.ModelMap;
 
 public class MyInfoView implements View {
@@ -26,14 +27,18 @@ public class MyInfoView implements View {
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
+        HttpStatus httpStatus = response.getStatus();
+        if (UN_AUTHORIZED.equals(httpStatus)) {
+            response.setStatus(UN_AUTHORIZED);
+            return;
+        }
+
         ModelMap modelMap = modelAndView.getModelMap();
         InputStream inputStream = getInputStream(STATIC_PREFIX + request.getRequestUri());
         byte[] buffer = getBuffer(inputStream, modelMap);
+
         setResponseHeader(request, response, buffer.length);
-
-        String body = new String(buffer);
-        response.setBody(body);
-
+        setResponseBody(response, buffer);
     }
 
     private InputStream getInputStream(String path) {
@@ -47,7 +52,14 @@ public class MyInfoView implements View {
         int lengthOfBodyContent
     ) {
         response.setHeader(CONTENT_TYPE, request.getContentType());
-        response.setHeader(CONTENT_LENGTH, String.valueOf(lengthOfBodyContent));
+        response.setHeader(CONTENT_LENGTH, valueOf(lengthOfBodyContent));
+    }
+
+    private void setResponseBody(
+        HttpServletResponse response,
+        byte[] buffer
+    ) {
+        response.setBody(new String(buffer));
     }
 
     private byte[] getBuffer(

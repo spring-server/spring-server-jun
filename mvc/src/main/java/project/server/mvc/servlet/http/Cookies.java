@@ -11,6 +11,7 @@ public class Cookies {
     private static final int VALUE = 1;
     private static final String DELIMITER = "=";
     private static final String COOKIE_DELIMITER = "; ";
+    private static final String SET_COOKIE_DELIMITER = ": ";
     private static final String SET_COOKIE = "Set-Cookie";
 
     private final Map<String, Cookie> cookiesMap;
@@ -61,19 +62,15 @@ public class Cookies {
             return EMPTY_STRING;
         }
 
-        String cookie = cookiesMap.get(SET_COOKIE).value();
-        if (cookie.trim().isBlank()) {
-            return EMPTY_STRING;
-        }
-
         StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(SET_COOKIE)
+            .append(SET_COOKIE_DELIMITER);
+
         for (String key : cookiesMap.keySet()) {
-            if (!stringBuilder.isEmpty()) {
-                stringBuilder.append(COOKIE_DELIMITER);
-            }
             stringBuilder.append(key)
                 .append(DELIMITER)
-                .append(cookiesMap.get(key).value());
+                .append(cookiesMap.get(key).value())
+                .append(COOKIE_DELIMITER);
         }
         return stringBuilder.toString().trim();
     }

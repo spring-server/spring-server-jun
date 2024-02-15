@@ -118,7 +118,7 @@ public class HttpHeaders {
                 .append(joiningValues(headers.get(key)));
         }
 
-        stringBuilder.append(cookies == null ? "" : cookies)
+        stringBuilder.append(cookies)
             .append(CARRIAGE_RETURN);
         return stringBuilder.toString();
     }

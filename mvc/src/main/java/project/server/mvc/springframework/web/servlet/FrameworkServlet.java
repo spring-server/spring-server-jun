@@ -11,7 +11,8 @@ import project.server.mvc.springframework.web.servlet.resource.ResourceHttpReque
 public abstract class FrameworkServlet extends HttpServletBean {
 
     private static final HandlerMethod staticResourceHandlerMethod = new HandlerMethod(new ResourceHttpRequestHandler());
-    private static final String STATIC_RESOURCE = ".";
+    private static final String EMPTY_STRING = "";
+    private static final List<String> staticResources = List.of(".js", ".css", ".favicon", ".jpg", ".jpeg", ".png");
     private static final List<String> excludeStaticResources = List.of("my-info.html");
 
     @Override
@@ -39,19 +40,20 @@ public abstract class FrameworkServlet extends HttpServletBean {
     private boolean isStaticResource(HttpServletRequest request) {
         String uri = request.getRequestUri();
         String[] parsedUri = uri.split("/");
-        boolean uriContainsExclude = false;
         for (String eachUri : parsedUri) {
-            if (".css".equals(eachUri) || ".png".equals(eachUri) || ".favicon".equals(eachUri)) {
+            if (EMPTY_STRING.equals(eachUri)) {
+                continue;
+            }
+            if (staticResources.contains(eachUri)) {
                 return true;
             }
         }
         for (String eachUri : parsedUri) {
             if (excludeStaticResources.contains(eachUri)) {
-                uriContainsExclude = true;
-                break;
+                return false;
             }
         }
-        return uri.contains(STATIC_RESOURCE) && !uriContainsExclude;
+        return true;
     }
 
     private void processStaticRequest(

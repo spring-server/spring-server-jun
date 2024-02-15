@@ -119,6 +119,6 @@ public class Request implements HttpServletRequest {
 
     @Override
     public String toString() {
-        return String.format("%s%s\r\n%s", requestLine, headers, requestBody);
+        return String.format("%s%s%s", requestLine, headers, requestBody);
     }
 }
