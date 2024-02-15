@@ -2,6 +2,7 @@ package project.server.mvc.servlet.http;
 
 public class StatusLine {
 
+    private static final String CARRIAGE_RETURN = "\r\n";
     private static final HttpVersion basicProtocolVersion = HttpVersion.HTTP_1_1;
 
     private String protocolVersion;
@@ -9,6 +10,7 @@ public class StatusLine {
 
     public StatusLine() {
         this.protocolVersion = basicProtocolVersion.getValue();
+        this.httpStatus = HttpStatus.OK;
     }
 
     public StatusLine(HttpStatus httpStatus) {
@@ -23,11 +25,16 @@ public class StatusLine {
         return httpStatus;
     }
 
+    public String getHttpStatusAsString() {
+        return httpStatus.getStatus();
+    }
+
     public void setStatus(HttpStatus status) {
         this.httpStatus = status;
     }
 
-    public String getHttpStatusAsString() {
-        return httpStatus.getStatus();
+    @Override
+    public String toString() {
+        return String.format("%s %s", protocolVersion, httpStatus.getStatus()) + CARRIAGE_RETURN;
     }
 }

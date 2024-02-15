@@ -36,6 +36,6 @@ public class RequestBody {
 
     @Override
     public String toString() {
-        return String.format("%s", attributes);
+        return String.format("%s", attributes == null ? "" : attributes);
     }
 }

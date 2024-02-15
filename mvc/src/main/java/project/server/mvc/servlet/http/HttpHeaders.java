@@ -2,18 +2,18 @@ package project.server.mvc.servlet.http;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import static java.util.Collections.emptyList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import static java.util.stream.Collectors.joining;
 
 public class HttpHeaders {
 
     private static final int KEY = 0;
     private static final int VALUE = 1;
     private static final String HEADER_DELIMITER = ": ";
+    private static final String HEADER_JOINING_DELIMITER = ", ";
     private static final String MULTI_VALUE_DELIMITER = ",";
     private static final String CARRIAGE_RETURN = "\r\n";
     private static final String COOKIE = "Cookie";
@@ -94,38 +94,38 @@ public class HttpHeaders {
         this.cookies.add(cookie);
     }
 
-    public String getCookiesAsString() {
-        return cookies.toString();
-    }
-
     public Cookies getCookies() {
         return cookies;
     }
 
+    public void addHeader(
+        String key,
+        String value
+    ) {
+        List<HttpHeader> values = this.headers
+            .getOrDefault(key, new ArrayList<>());
+        values.add(new HttpHeader(key, value));
+        this.headers.put(key, values);
+    }
+
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-
         List<String> keys = new ArrayList<>(this.headers.keySet());
-        Collections.sort(keys);
-
+        StringBuilder stringBuilder = new StringBuilder();
         for (String key : keys) {
-            if (COOKIE.equals(key)) {
-                stringBuilder.append(key)
-                    .append(HEADER_DELIMITER)
-                    .append(cookies);
-                continue;
-            }
             stringBuilder.append(key)
                 .append(HEADER_DELIMITER)
                 .append(joiningValues(headers.get(key)));
         }
+
+        stringBuilder.append(cookies == null ? "" : cookies)
+            .append(CARRIAGE_RETURN);
         return stringBuilder.toString();
     }
 
     private String joiningValues(List<HttpHeader> headers) {
         return headers.stream()
             .map(HttpHeader::getValue)
-            .collect(Collectors.joining(", ")) + CARRIAGE_RETURN;
+            .collect(joining(HEADER_JOINING_DELIMITER)) + CARRIAGE_RETURN;
     }
 }

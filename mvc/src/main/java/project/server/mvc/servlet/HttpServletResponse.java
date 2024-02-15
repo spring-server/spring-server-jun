@@ -5,15 +5,17 @@ import project.server.mvc.servlet.http.Cookie;
 import project.server.mvc.servlet.http.HttpStatus;
 
 public interface HttpServletResponse extends ServletResponse {
-    String getStatusAsString();
+    String getHttpHeaderLine();
+
+    SocketChannel getSocketChannel();
+
+    HttpStatus getStatus();
 
     void setStatus(HttpStatus status);
 
     void addCookie(Cookie cookie);
 
-    String getCookiesAsString();
+    void setHeader(String key, String value);
 
-    SocketChannel getSocketChannel();
-
-    HttpStatus getStatus();
+    void setBody(String body);
 }
