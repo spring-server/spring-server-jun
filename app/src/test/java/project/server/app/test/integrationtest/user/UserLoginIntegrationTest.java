@@ -26,7 +26,8 @@ class UserLoginIntegrationTest extends IntegrationTestBase {
     @Test
     @DisplayName("정상적으로 로그인이 되면 세션이 발급된다.")
     void sessionCreateTest() {
-        Long userId = userSaveUseCase.save(new User("Steve-Jobs", "Helloworld"));
+        User newUser = new User("Steve-Jobs", "Helloworld");
+        Long userId = userSaveUseCase.save(newUser.getUsername(), newUser.getPassword());
         User findUser = userSearchUseCase.findById(userId);
         Session session = loginUseCase.login(findUser.getUsername(), findUser.getPassword());
 
@@ -37,7 +38,7 @@ class UserLoginIntegrationTest extends IntegrationTestBase {
     @DisplayName("세션이 존재하면 이를 조회할 수 있다.")
     void sessionSearchTest() {
         User newUser = new User("Steve-Jobs", "Helloworld");
-        Long userId = userSaveUseCase.save(newUser);
+        Long userId = userSaveUseCase.save(newUser.getUsername(), newUser.getPassword());
         User findUser = userSearchUseCase.findById(userId);
         Session session = loginUseCase.login(findUser.getUsername(), findUser.getPassword());
 

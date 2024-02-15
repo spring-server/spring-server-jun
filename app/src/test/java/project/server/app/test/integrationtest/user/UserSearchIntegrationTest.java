@@ -21,7 +21,7 @@ class UserSearchIntegrationTest extends IntegrationTestBase {
     @DisplayName("사용자가 저장되면 PK로 조회할 수 있다.")
     void userSearchTest() {
         User newUser = new User("Steve-Jobs", "helloworld");
-        userSaveUseCase.save(newUser);
+        userSaveUseCase.save(newUser.getUsername(), newUser.getPassword());
     }
 
     @Test

@@ -23,7 +23,7 @@ class UserSaveIntegrationTest extends IntegrationTestBase {
     @DisplayName("사용자가 저장되면 PK가 생성된다.")
     void userSaveTest() {
         User newUser = new User("Steve-Jobs", "helloworld");
-        Long userId = userSaveUseCase.save(newUser);
+        Long userId = userSaveUseCase.save(newUser.getUsername(), newUser.getPassword());
 
         assertNotNull(userId);
     }
@@ -32,9 +32,9 @@ class UserSaveIntegrationTest extends IntegrationTestBase {
     @DisplayName("사용자가 이미 저장 돼 있다면 AlreadyRegisteredUserException이 발생한다.")
     void userSaveFailureTest() {
         User newUser = new User("Steve-Jobs", "helloworld");
-        userSaveUseCase.save(newUser);
+        userSaveUseCase.save(newUser.getUsername(), newUser.getPassword());
 
-        assertThatThrownBy(() -> userSaveUseCase.save(newUser))
+        assertThatThrownBy(() -> userSaveUseCase.save(newUser.getUsername(), newUser.getPassword()))
             .isInstanceOf(BusinessException.class)
             .isExactlyInstanceOf(DuplicatedUsernameException.class)
             .hasMessage("중복된 아이디 입니다.");
@@ -45,9 +45,9 @@ class UserSaveIntegrationTest extends IntegrationTestBase {
     void duplicatedUsernameSaveTest() {
         User newUser = new User("Steve-Jobs", "helloworld");
         User duplicatedUser = new User("Steve-Jobs", "helloworld");
-        userSaveUseCase.save(newUser);
+        userSaveUseCase.save(newUser.getUsername(), newUser.getPassword());
 
-        assertThatThrownBy(() -> userSaveUseCase.save(duplicatedUser))
+        assertThatThrownBy(() -> userSaveUseCase.save(duplicatedUser.getUsername(), duplicatedUser.getPassword()))
             .isInstanceOf(BusinessException.class)
             .isExactlyInstanceOf(DuplicatedUsernameException.class);
     }
