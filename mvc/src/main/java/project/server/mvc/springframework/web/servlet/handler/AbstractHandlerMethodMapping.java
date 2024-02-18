@@ -24,7 +24,8 @@ public abstract class AbstractHandlerMethodMapping extends AbstractHandlerMappin
     }
 
     private String getRequestPath(HttpServletRequest request) {
-        return request.getRequestUri();
+        return request.getRequestUri()
+            .replace(".html", "");
     }
 
     private HandlerMethod lookupHandlerMethod(
@@ -52,7 +53,7 @@ public abstract class AbstractHandlerMethodMapping extends AbstractHandlerMappin
                 new MappingRegistration(new HandlerMethod(homeController))
             );
             registry.put(
-                new RequestMappingInfo(HttpMethod.GET, "/my-info.html"),
+                new RequestMappingInfo(HttpMethod.GET, "/my-info"),
                 new MappingRegistration(new HandlerMethod(userInfoController))
             );
             registry.put(
