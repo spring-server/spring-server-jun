@@ -72,3 +72,25 @@ sonarqube {
         property("sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/jacoco/index.xml")
     }
 }
+
+task downloadYml {
+    doLast {
+        def url = new URL(System.getenv("YML_URL"))
+        def connection = url.openConnection()
+
+        def file = new File(projectDir, "./src/main/resources/application.yml")
+        if (!file.parentFile.exists()) {
+            file.parentFile.mkdirs()
+        }
+
+        connection.inputStream.withStream { inputStream ->
+            file.withOutputStream { outputStream ->
+                inputStream.transferTo(outputStream)
+            }
+        }
+    }
+}
+
+tasks.named("downloadYml") {
+    dependsOn downloadYml
+}
