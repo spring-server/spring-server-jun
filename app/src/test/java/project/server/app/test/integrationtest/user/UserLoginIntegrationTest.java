@@ -2,7 +2,9 @@ package project.server.app.test.integrationtest.user;
 
 import static java.lang.Long.MAX_VALUE;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import project.server.app.common.exception.UnAuthorizedException;
@@ -46,13 +48,10 @@ class UserLoginIntegrationTest extends IntegrationTestBase {
     }
 
     @Test
-    @DisplayName("세션이 존재하지 않으면 UnAuthorizedException이 발생한다.")
+    @DisplayName("세션이 존재하지 않으면 null 값이 반환된다.")
     void sessionSearchFailureTest() {
         Long invalidSessionId = MAX_VALUE;
 
-        assertThatThrownBy(() -> loginUseCase.findSessionById(invalidSessionId))
-            .isInstanceOf(RuntimeException.class)
-            .isExactlyInstanceOf(UnAuthorizedException.class)
-            .hasMessage("권한이 존재하지 않습니다.");
+        assertNull(loginUseCase.findSessionById(invalidSessionId));
     }
 }
