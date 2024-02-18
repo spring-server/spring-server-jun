@@ -1,7 +1,6 @@
 package project.server.app.core.web.user.presentation;
 
 import lombok.extern.slf4j.Slf4j;
-import project.server.app.core.domain.user.User;
 import project.server.app.core.web.user.application.UserSaveUseCase;
 import project.server.app.core.web.user.presentation.validator.UserValidator;
 import project.server.mvc.servlet.HttpServletRequest;
@@ -38,7 +37,7 @@ public class SignUpController implements Handler {
         log.info("username: {}, password: {}", username, password);
 
         validator.validateLoginInfo(username, password);
-        userSaveUseCase.save(new User(username, password));
+        userSaveUseCase.save(username, password);
 
         response.setStatus(OK);
         return new ModelAndView("redirect:/index.html");

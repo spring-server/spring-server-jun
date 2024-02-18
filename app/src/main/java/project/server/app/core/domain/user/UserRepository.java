@@ -4,15 +4,17 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository {
-    User save(User user);
+    Long save(User user);
 
     Optional<User> findById(Long userId);
 
     void clear();
 
-    boolean existByName(String username);
-
-    List<User> findAll();
+    boolean existsByName(String username);
 
     Optional<User> findByUsernameAndPassword(String username, String password);
+
+    void delete(User user);
+
+    List<User> findAll();
 }

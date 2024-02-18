@@ -5,6 +5,8 @@ import java.util.Map;
 
 public class RequestBody {
 
+    private static final String CARRIAGE_RETURN = "\r\n";
+    private static final String EMPTY_STRING = "";
     private static final String VALUE_DELIMITER = "=";
     private static final String VALUES_DELIMITER = "&";
     private static final int KEY = 0;
@@ -36,6 +38,6 @@ public class RequestBody {
 
     @Override
     public String toString() {
-        return String.format("%s", attributes);
+        return String.format("%s", attributes == null ? EMPTY_STRING + CARRIAGE_RETURN : attributes + CARRIAGE_RETURN);
     }
 }

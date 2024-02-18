@@ -1,41 +1,33 @@
 package project.server.mvc.springframework.web.servlet;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import project.server.mvc.servlet.HttpServletResponse;
 import project.server.mvc.servlet.http.HttpStatus;
-import static project.server.mvc.servlet.http.HttpStatus.UN_AUTHORIZED;
+import static project.server.mvc.servlet.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import project.server.mvc.springframework.annotation.Component;
+import project.server.mvc.springframework.exception.ErrorResponse;
 
 @Slf4j
 @Component
 public class GlobalExceptionHandler {
 
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
     public void resolveException(
         HttpServletResponse response,
         Exception exception
-    ) {
+    ) throws JsonProcessingException {
         Throwable cause = exception.getCause();
-        HttpStatus findStatus = getHttpStatus(cause.getMessage());
-        log.error("{code:{}, message:{}}", findStatus.getStatusCode(), cause.getMessage());
-        response.setStatus(findStatus);
-    }
+        if (cause == null) {
+            response.setStatus(INTERNAL_SERVER_ERROR);
+            return;
+        }
+        String stringJson = cause.toString();
+        ErrorResponse errorResponse = objectMapper.readValue(stringJson, ErrorResponse.class);
 
-    public HttpStatus getHttpStatus(String message) {
-        if ("중복된 아이디 입니다.".equals(message)) {
-            return HttpStatus.BAD_REQUEST;
-        }
-        if ("올바른 값을 입력해주세요.".equals(message)) {
-            return HttpStatus.BAD_REQUEST;
-        }
-        if ("이미 가입된 사용자 입니다.".equals(message)) {
-            return HttpStatus.BAD_REQUEST;
-        }
-        if ("사용자를 찾을 수 없습니다.".equals(message)) {
-            return HttpStatus.NOT_FOUND;
-        }
-        if ("권한이 존재하지 않습니다.".equals(message)) {
-            return UN_AUTHORIZED;
-        }
-        return HttpStatus.INTERNAL_SERVER_ERROR;
+        HttpStatus findStatus = HttpStatus.findByCode(errorResponse.getCode());
+        response.setStatus(findStatus);
     }
 }

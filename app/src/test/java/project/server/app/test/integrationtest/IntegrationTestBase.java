@@ -1,6 +1,6 @@
 package project.server.app.test.integrationtest;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import project.server.app.core.domain.user.UserRepository;
 import project.server.app.core.web.user.persistence.UserPersistenceRepository;
 import project.server.mvc.springframework.context.ApplicationContext;
@@ -21,7 +21,7 @@ public abstract class IntegrationTestBase {
         }
     }
 
-    @BeforeEach
+    @AfterEach
     void setUp() {
         userRepository.clear();
     }

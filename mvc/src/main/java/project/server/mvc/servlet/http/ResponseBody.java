@@ -5,18 +5,20 @@ import java.util.Objects;
 public class ResponseBody {
 
     private static final String EMPTY_BODY = "";
+    private static final String CARRIAGE_RETURN = "\r\n";
+
     private String body;
 
     public ResponseBody() {
         this.body = EMPTY_BODY;
     }
 
-    public ResponseBody(String body) {
-        this.body = body;
-    }
-
     public String getBody() {
         return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 
     @Override
@@ -38,6 +40,9 @@ public class ResponseBody {
 
     @Override
     public String toString() {
-        return body;
+        if (body.isBlank()) {
+            return "";
+        }
+        return body + CARRIAGE_RETURN;
     }
 }

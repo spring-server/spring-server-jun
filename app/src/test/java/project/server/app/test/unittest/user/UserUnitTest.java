@@ -1,5 +1,6 @@
 package project.server.app.test.unittest.user;
 
+import java.time.LocalDateTime;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -7,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import static project.server.app.common.fixture.user.UserFixture.createUser;
+import static project.server.app.core.domain.user.Deleted.FALSE;
+import static project.server.app.core.domain.user.Deleted.TRUE;
 import project.server.app.core.domain.user.User;
 
 @DisplayName("[UnitTest] 사용자 단위 테스트")
@@ -16,6 +19,34 @@ class UserUnitTest {
     @DisplayName("사용자 객체를 생성할 수 있다.")
     void userCreateTest() {
         assertNotNull(createUser());
+    }
+
+    @Test
+    @DisplayName("사용자가 최초로 생성되면 삭제 칼럼 값이 FALSE다.")
+    void userInitDeletedTest() {
+        User user = createUser();
+
+        assertEquals(FALSE, user.getDeleted());
+    }
+
+    @Test
+    @DisplayName("사용자를 삭제하면 deleted 값이 TRUE가 된다.")
+    void userDeleteTest() {
+        User user = createUser();
+        LocalDateTime now = LocalDateTime.now();
+        user.delete(now);
+
+        assertEquals(TRUE, user.getDeleted());
+    }
+
+    @Test
+    @DisplayName("사용자를 삭제하면 최종 수정한 날짜가 현재로 바뀐다.")
+    void userDeleteLastModifiedAtTest() {
+        User user = createUser();
+        LocalDateTime now = LocalDateTime.now();
+        user.delete(now);
+
+        assertEquals(now, user.getLastModifiedAt());
     }
 
     @Test

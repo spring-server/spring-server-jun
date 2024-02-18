@@ -1,5 +1,6 @@
 package project.server.mvc.tomcat;
 
+import java.nio.channels.SocketChannel;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.UUID;
@@ -7,7 +8,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Predicate;
 
-public class Nio2EndPoint extends AbstractEndpoint {
+public class Nio2EndPoint extends AbstractJsseEndpoint<SocketChannel> {
 
     private final Poller poller;
 
@@ -16,13 +17,21 @@ public class Nio2EndPoint extends AbstractEndpoint {
         this.poller = new Poller();
     }
 
+    @Override
+    public boolean setSocketOptions(SocketChannel socket) {
+//        PollerEvent pollerEvent = new PollerEvent(socket);
+        return false;
+    }
+
     class Poller implements Runnable {
 
         private static final Queue<PollerEvent> events = new ConcurrentLinkedQueue<>();
 
         @Override
         public void run() {
-
+            while (true) {
+                break;
+            }
         }
 
         public void register(NioSocketWrapper socketWrapper) {

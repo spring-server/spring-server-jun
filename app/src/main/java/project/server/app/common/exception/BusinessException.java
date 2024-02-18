@@ -1,6 +1,7 @@
 package project.server.app.common.exception;
 
 import project.server.app.common.codeandmessage.ErrorCodeAndMessage;
+import project.server.mvc.servlet.http.HttpStatus;
 
 public class BusinessException extends RuntimeException {
 
@@ -13,5 +14,15 @@ public class BusinessException extends RuntimeException {
 
     public ErrorCodeAndMessage getCodeAndMessage() {
         return codeAndMessage;
+    }
+
+    @Override
+    public String toString() {
+        HttpStatus status = codeAndMessage.getStatus();
+        return String.format(
+            "{\"code\":%d, \"message\":\"%s\"}",
+            status.getStatusCode(),
+            codeAndMessage.getErrorMessage()
+        );
     }
 }

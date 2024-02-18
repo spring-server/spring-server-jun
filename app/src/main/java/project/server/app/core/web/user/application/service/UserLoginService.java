@@ -39,12 +39,16 @@ public class UserLoginService implements UserLoginUseCase {
 
     @Override
     public Session findSessionById(Long userId) {
-        Session findSession = sessionManager.findByUserId(userId)
-            .orElseThrow(UnAuthorizedException::new);
+        try {
+            Session findSession = sessionManager.findByUserId(userId)
+                .orElseThrow(UnAuthorizedException::new);
 
-        if (!findSession.isValid(now())) {
-            throw new SessionExpiredException();
+            if (!findSession.isValid(now())) {
+                throw new SessionExpiredException();
+            }
+            return findSession;
+        } catch (UnAuthorizedException | SessionExpiredException exception) {
+            return null;
         }
-        return findSession;
     }
 }

@@ -1,6 +1,7 @@
 package project.server.app.common.exception;
 
 import project.server.app.common.codeandmessage.failure.ErrorCodeAndMessages;
+import project.server.mvc.servlet.http.HttpStatus;
 
 public class InvalidParameterException extends RuntimeException {
 
@@ -18,5 +19,15 @@ public class InvalidParameterException extends RuntimeException {
 
     public Object getArgs() {
         return args;
+    }
+
+    @Override
+    public String toString() {
+        HttpStatus status = errorCodeAndMessages.getStatus();
+        return String.format(
+            "{\"code\":%d, \"message\":\"%s\"}",
+            status.getStatusCode(),
+            errorCodeAndMessages.getErrorMessage()
+        );
     }
 }

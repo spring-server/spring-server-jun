@@ -3,23 +3,32 @@ package project.server.mvc.springframework.context;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import static java.lang.reflect.Modifier.isStatic;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.scanners.TypeAnnotationsScanner;
-import org.reflections.util.ClasspathHelper;
+import static org.reflections.scanners.Scanners.SubTypes;
+import static org.reflections.scanners.Scanners.TypesAnnotated;
+import static org.reflections.util.ClasspathHelper.forPackage;
 import org.reflections.util.ConfigurationBuilder;
 import project.server.mvc.springframework.annotation.Bean;
 import project.server.mvc.springframework.annotation.Component;
 import project.server.mvc.springframework.annotation.Configuration;
 
 public class ApplicationContext {
-    private static final Map<Class<?>, Object> beans = new HashMap<>();
-    private static final Map<Class<?>, Object> dependenciesInjectedBeans = new HashMap<>();
-    private static final Map<String, Object> dependenciesInjectedBeansByName = new HashMap<>();
+
+    private static final int FIRST_CONSTRUCTOR = 0;
+    private static final String PROXY = "Proxy";
+    private static final String DATASOURCE = "Datasource";
+
+    private static final Set<Class<?>> allBeans = new HashSet<>();
+    private static final Map<String, Object> nameKeyBeans = new HashMap<>();
+    private static final Map<Class<?>, Object> clazzKeyBeans = new HashMap<>();
+    private static final Map<Class<?>, Object> dependencyInjectedBeans = new HashMap<>();
 
     private static Reflections reflections;
 
@@ -32,6 +41,14 @@ public class ApplicationContext {
         processConfigurations(configurations);
     }
 
+    private Reflections getReflections(String... packages) {
+        ConfigurationBuilder configurationBuilder = createConfigurationBuilder();
+        for (String packageName : packages) {
+            configurationBuilder.addUrls(forPackage(packageName));
+        }
+        return new Reflections(configurationBuilder);
+    }
+
     private void componentScan(Set<Class<?>> components) throws Exception {
         for (Class<?> component : components) {
             if (isInstance(component)) {
@@ -41,7 +58,7 @@ public class ApplicationContext {
 
         for (Class<?> instance : components) {
             if (isInstance(instance)) {
-                injectDependencies(instance);
+                put(instance);
                 registerNamedInstance(instance);
             }
         }
@@ -59,99 +76,126 @@ public class ApplicationContext {
         }
     }
 
+    private boolean isInstance(Class<?> clazz) {
+        return !clazz.isAnnotation()
+            && !clazz.isInterface()
+            && !Modifier.isAbstract(clazz.getModifiers());
+    }
+
     private Object createInstance(Class<?> clazz) throws Exception {
         Constructor<?> constructor = clazz.getDeclaredConstructor();
         constructor.setAccessible(true);
         return constructor.newInstance();
     }
 
-    private void processBeanMethod(Object configInstance, Method method) throws Exception {
+    private void processBeanMethod(
+        Object configInstance,
+        Method method
+    ) throws Exception {
         Class<?> returnType = method.getReturnType();
-        if (!Modifier.isStatic(method.getModifiers()) && returnType != void.class) {
+        if (!isStatic(method.getModifiers()) && isNotVoid(returnType)) {
             Object bean = method.invoke(configInstance);
-            beans.put(returnType, bean);
-            dependenciesInjectedBeansByName.put(method.getName(), bean);
+            clazzKeyBeans.put(returnType, bean);
+            nameKeyBeans.put(method.getName(), bean);
         }
     }
 
-    private Reflections getReflections(String... packages) {
-        ConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
-            .setScanners(new SubTypesScanner(), new TypeAnnotationsScanner());
-        for (String packageName : packages) {
-            configurationBuilder.addUrls(ClasspathHelper.forPackage(packageName));
-        }
-        return new Reflections(configurationBuilder);
+    private boolean isNotVoid(Class<?> returnType) {
+        return returnType != void.class;
     }
 
-    private boolean isInstance(Class<?> clazz) {
-        return !clazz.isAnnotation() && !clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers());
+    private ConfigurationBuilder createConfigurationBuilder() {
+        return new ConfigurationBuilder()
+            .setScanners(SubTypes, TypesAnnotated);
     }
 
     private void registerNamedInstance(Class<?> clazz) {
-        Object instance = dependenciesInjectedBeans.get(clazz);
+        Object instance = dependencyInjectedBeans.get(clazz);
         if (instance != null) {
-            dependenciesInjectedBeansByName.put(clazz.getSimpleName(), instance);
+            nameKeyBeans.put(clazz.getSimpleName(), instance);
         }
     }
 
     public static <T> T getBean(String beanName) {
         @SuppressWarnings("unchecked")
-        T bean = (T) dependenciesInjectedBeansByName.get(beanName);
+        T bean = (T) ApplicationContext.nameKeyBeans.get(beanName);
         return bean;
     }
 
     private void add(Class<?> clazz) throws Exception {
-        if (beans.containsKey(clazz)) {
+        if (clazzKeyBeans.containsKey(clazz) || allBeans.contains(clazz)) {
             return;
         }
+        allBeans.add(clazz);
 
         if (clazz.isInterface()) {
+            if (isDataSource(clazz)) {
+                return;
+            }
+
             @SuppressWarnings("unchecked")
             Set<Class<?>> implementations = reflections.getSubTypesOf((Class<Object>) clazz);
             if (implementations.isEmpty()) {
                 throw new IllegalStateException("No implementation found for interface: " + clazz.getName());
             }
 
-            Class<?> subTypeClass = implementations.iterator().next();
-            add(subTypeClass);
-            beans.put(clazz, beans.get(subTypeClass));
+            Class<?> concreteClass = implementations.stream()
+                .filter(containsName(PROXY))
+                .findAny()
+                .orElse(implementations.iterator().next());
+
+            add(concreteClass);
+            clazzKeyBeans.put(clazz, clazzKeyBeans.get(concreteClass));
             return;
         }
 
-        Constructor<?> constructor = clazz.getDeclaredConstructors()[0];
+        Object instance = injectDependency(clazz);
+        clazzKeyBeans.put(clazz, instance);
+        dependencyInjectedBeans.put(clazz, instance);
+    }
+
+    private boolean isDataSource(Class<?> clazz) {
+        return DATASOURCE.equals(clazz.getSimpleName());
+    }
+
+    private Object injectDependency(Class<?> clazz) throws Exception {
+        Constructor<?> constructor = clazz.getDeclaredConstructors()[FIRST_CONSTRUCTOR];
         constructor.setAccessible(true);
         Class<?>[] paramTypes = constructor.getParameterTypes();
         Object[] params = new Object[paramTypes.length];
 
         for (int index = 0; index < paramTypes.length; index++) {
             Class<?> parameterType = paramTypes[index];
-            if (!beans.containsKey(parameterType)) {
+            if (!clazzKeyBeans.containsKey(parameterType)) {
                 add(parameterType);
             }
-            params[index] = beans.get(parameterType);
+            params[index] = clazzKeyBeans.get(parameterType);
         }
 
-        Object instance = constructor.newInstance(params);
-        beans.put(clazz, instance);
+        return constructor.newInstance(params);
     }
 
-    private void injectDependencies(Class<?> clazz) {
-        if (dependenciesInjectedBeans.containsKey(clazz)) {
+    private Predicate<Class<?>> containsName(String name) {
+        return clazz -> clazz.getSimpleName().contains(name);
+    }
+
+    private void put(Class<?> clazz) {
+        if (dependencyInjectedBeans.containsKey(clazz)) {
             return;
         }
 
-        Object instance = beans.get(clazz);
+        Object instance = clazzKeyBeans.get(clazz);
         if (instance == null) {
             throw new IllegalStateException("Instance not found: " + clazz.getName());
         }
-        dependenciesInjectedBeans.put(clazz, instance);
+        dependencyInjectedBeans.put(clazz, instance);
     }
 
     public static <T> T getBean(Class<T> clazz) {
-        return clazz.cast(dependenciesInjectedBeans.get(clazz));
+        return clazz.cast(dependencyInjectedBeans.get(clazz));
     }
 
     public static Collection<Object> getAllDependencyInjectedInstances() {
-        return dependenciesInjectedBeansByName.values();
+        return nameKeyBeans.values();
     }
 }

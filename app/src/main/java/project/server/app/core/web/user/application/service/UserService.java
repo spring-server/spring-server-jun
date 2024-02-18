@@ -21,8 +21,12 @@ public class UserService implements UserSaveUseCase, UserSearchUseCase, UserDele
     }
 
     @Override
-    public User save(User user) {
-        boolean duplicatedUser = userRepository.existByName(user.getUsername());
+    public Long save(
+        String username,
+        String password
+    ) {
+        User user = new User(username, password);
+        boolean duplicatedUser = userRepository.existsByName(user.getUsername());
         if (duplicatedUser) {
             throw new DuplicatedUsernameException();
         }
@@ -31,8 +35,12 @@ public class UserService implements UserSaveUseCase, UserSearchUseCase, UserDele
 
     @Override
     public User findById(Long userId) {
-        return userRepository.findById(userId)
+        User findUser = userRepository.findById(userId)
             .orElseThrow(UserNotFoundException::new);
+        if (findUser.isAlreadyDeleted()) {
+            throw new UserNotFoundException();
+        }
+        return findUser;
     }
 
     @Override
@@ -45,5 +53,6 @@ public class UserService implements UserSaveUseCase, UserSearchUseCase, UserDele
         }
 
         findUser.delete(LocalDateTime.now());
+        userRepository.delete(findUser);
     }
 }

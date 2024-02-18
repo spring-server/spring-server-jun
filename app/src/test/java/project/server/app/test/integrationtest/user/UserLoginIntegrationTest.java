@@ -1,7 +1,10 @@
 package project.server.app.test.integrationtest.user;
 
+import static java.lang.Long.MAX_VALUE;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import project.server.app.common.exception.UnAuthorizedException;
@@ -9,22 +12,26 @@ import project.server.app.common.login.Session;
 import project.server.app.core.domain.user.User;
 import project.server.app.core.web.user.application.UserLoginUseCase;
 import project.server.app.core.web.user.application.UserSaveUseCase;
-import project.server.app.core.web.user.application.service.UserLoginService;
-import project.server.app.core.web.user.application.service.UserService;
+import project.server.app.core.web.user.application.UserSearchUseCase;
+import project.server.app.core.web.user.application.service.UserLoginServiceProxy;
+import project.server.app.core.web.user.application.service.UserServiceProxy;
 import project.server.app.test.integrationtest.IntegrationTestBase;
 import static project.server.mvc.springframework.context.ApplicationContext.getBean;
 
 @DisplayName("[IntegrationTest] 로그인 통합 테스트")
 class UserLoginIntegrationTest extends IntegrationTestBase {
 
-    private final UserSaveUseCase userSaveUseCase = getBean(UserService.class);
-    private final UserLoginUseCase loginUseCase = getBean(UserLoginService.class);
+    private final UserSaveUseCase userSaveUseCase = getBean(UserServiceProxy.class);
+    private final UserSearchUseCase userSearchUseCase = getBean(UserServiceProxy.class);
+    private final UserLoginUseCase loginUseCase = getBean(UserLoginServiceProxy.class);
 
     @Test
     @DisplayName("정상적으로 로그인이 되면 세션이 발급된다.")
     void sessionCreateTest() {
-        User savedUser = userSaveUseCase.save(new User("Steve-Jobs", "Helloworld"));
-        Session session = loginUseCase.login(savedUser.getUsername(), savedUser.getPassword());
+        User newUser = new User("Steve-Jobs", "Helloworld");
+        Long userId = userSaveUseCase.save(newUser.getUsername(), newUser.getPassword());
+        User findUser = userSearchUseCase.findById(userId);
+        Session session = loginUseCase.login(findUser.getUsername(), findUser.getPassword());
 
         assertNotNull(session);
     }
@@ -33,20 +40,18 @@ class UserLoginIntegrationTest extends IntegrationTestBase {
     @DisplayName("세션이 존재하면 이를 조회할 수 있다.")
     void sessionSearchTest() {
         User newUser = new User("Steve-Jobs", "Helloworld");
-        User savedUser = userSaveUseCase.save(newUser);
-        Session session = loginUseCase.login(savedUser.getUsername(), savedUser.getPassword());
+        Long userId = userSaveUseCase.save(newUser.getUsername(), newUser.getPassword());
+        User findUser = userSearchUseCase.findById(userId);
+        Session session = loginUseCase.login(findUser.getUsername(), findUser.getPassword());
 
         assertNotNull(loginUseCase.findSessionById(session.userId()));
     }
 
     @Test
-    @DisplayName("세션이 존재하지 않으면 UnAuthorizedException이 발생한다.")
+    @DisplayName("세션이 존재하지 않으면 null 값이 반환된다.")
     void sessionSearchFailureTest() {
-        Long invalidSessionId = Long.MAX_VALUE;
+        Long invalidSessionId = MAX_VALUE;
 
-        assertThatThrownBy(() -> loginUseCase.findSessionById(invalidSessionId))
-            .isInstanceOf(RuntimeException.class)
-            .isExactlyInstanceOf(UnAuthorizedException.class)
-            .hasMessage("권한이 존재하지 않습니다.");
+        assertNull(loginUseCase.findSessionById(invalidSessionId));
     }
 }
