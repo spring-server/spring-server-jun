@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
 import static project.server.mvc.servlet.http.HttpStatus.NOT_FOUND;
@@ -81,11 +80,7 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler {
         HttpServletResponse response,
         byte[] body
     ) throws IOException {
-        SocketChannel channel = response.getSocketChannel();
-        ByteBuffer buffer = ByteBuffer.wrap(body);
-        while (buffer.hasRemaining()) {
-            channel.write(buffer);
-        }
+        response.write(body);
     }
 
     private void setResponseHeader(
@@ -93,16 +88,12 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler {
         HttpServletResponse response,
         int lengthOfBodyContent
     ) throws IOException {
-        SocketChannel channel = response.getSocketChannel();
         response.getHttpHeaderLine();
         response.setHeader(CONTENT_TYPE, request.getContentType());
         response.setHeader(CONTENT_LENGTH, String.valueOf(lengthOfBodyContent));
 
         String header = response.getHttpHeaderLine();
-        ByteBuffer headerBuffer = ByteBuffer.wrap(header.getBytes(UTF_8));
-        while (headerBuffer.hasRemaining()) {
-            channel.write(headerBuffer);
-        }
+        response.write(header);
     }
 
     private byte[] readInputStream(InputStream inputStream) throws IOException {

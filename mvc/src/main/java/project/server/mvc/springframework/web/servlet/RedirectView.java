@@ -15,6 +15,8 @@ import static project.server.mvc.servlet.http.HttpStatus.MOVE_PERMANENTLY;
 public class RedirectView implements View {
 
     private static final String PROTOCOL = "http://";
+    private static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
+    private static final String ALL_ORIGIN = "*";
     private static final String LOCATION_DELIMITER = "Location";
     private static final String REDIRECT_LOCATION = "redirect:/index.html";
     private static final String CONTENT_TYPE = "Content-Type";
@@ -34,7 +36,7 @@ public class RedirectView implements View {
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
-        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, ALL_ORIGIN);
         if (MOVE_PERMANENTLY.equals(response.getStatus())) {
             response.setHeader(LOCATION_DELIMITER, getRedirectLocation(request));
             return;
@@ -42,7 +44,7 @@ public class RedirectView implements View {
         InputStream inputStream = getInputStream();
         byte[] buffer = getBuffer(inputStream);
         setResponseHeader(response, buffer.length);
-        response.setBody(new String(buffer));
+        setResponseBody(response, buffer);
     }
 
     private String getRedirectLocation(HttpServletRequest request) {
@@ -64,7 +66,7 @@ public class RedirectView implements View {
             }
         }
         return stringBuilder.toString()
-            .getBytes();
+            .getBytes(UTF_8);
     }
 
     private void setResponseHeader(
@@ -73,5 +75,12 @@ public class RedirectView implements View {
     ) {
         response.setHeader(CONTENT_TYPE, TEXT_HTML);
         response.setHeader(CONTENT_LENGTH, valueOf(lengthOfBodyContent));
+    }
+
+    private void setResponseBody(
+        HttpServletResponse response,
+        byte[] buffer
+    ) {
+        response.setBody(new String(buffer));
     }
 }

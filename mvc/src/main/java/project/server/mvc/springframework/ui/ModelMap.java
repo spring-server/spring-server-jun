@@ -17,4 +17,8 @@ public class ModelMap {
     public Object getAttribute(String key) {
         return map.get(key);
     }
+
+    public String[] keys() {
+        return new String[map.keySet().size()];
+    }
 }

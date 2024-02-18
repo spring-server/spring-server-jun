@@ -3,7 +3,7 @@ package project.server.mvc;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
+import static java.nio.ByteBuffer.allocate;
 import java.nio.channels.SelectionKey;
 import static java.nio.channels.SelectionKey.OP_READ;
 import static java.nio.channels.SelectionKey.OP_WRITE;
@@ -15,8 +15,11 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import lombok.extern.slf4j.Slf4j;
-import project.server.mvc.tomcat.AsyncRequest;
+import project.server.mvc.servlet.HttpServletResponse;
+import static project.server.mvc.servlet.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import project.server.mvc.tomcat.AbstractEndpoint;
 import project.server.mvc.tomcat.Nio2EndPoint;
+import project.server.mvc.tomcat.NioSocketWrapper;
 
 @Slf4j
 public class Acceptor implements Runnable {
@@ -25,7 +28,7 @@ public class Acceptor implements Runnable {
     private static final int BUFFER_CAPACITY = 1024;
 
     private final Selector selector;
-    private final Nio2EndPoint nio2EndPoint;
+    private final AbstractEndpoint<SocketChannel> nio2EndPoint;
     private final ExecutorService service = newFixedThreadPool(FIXED_THREAD_COUNT);
 
     public Acceptor(
@@ -84,17 +87,20 @@ public class Acceptor implements Runnable {
 
     private void read(SelectionKey key) {
         log.debug("READ");
+        NioSocketWrapper socketWrapper = null;
         try {
             SocketChannel socketChannel = (SocketChannel) key.channel();
-            ByteBuffer buffer = ByteBuffer.allocate(BUFFER_CAPACITY);
-            socketChannel.read(buffer);
-            AsyncRequest request = new AsyncRequest(socketChannel, buffer);
-            buffer.flip();
+            ByteBuffer buffer = allocate(BUFFER_CAPACITY);
+            socketWrapper = new NioSocketWrapper(socketChannel, buffer);
+            socketWrapper.flip();
 
             socketChannel.register(selector, OP_WRITE);
-            key.attach(request);
+            key.attach(socketWrapper);
         } catch (IOException exception) {
-
+            if (socketWrapper != null) {
+                HttpServletResponse response = socketWrapper.getResponse();
+                response.setStatus(INTERNAL_SERVER_ERROR);
+            }
         }
     }
 
@@ -104,8 +110,12 @@ public class Acceptor implements Runnable {
         service.submit((Runnable) key.attachment());
         try {
             socketChannel.register(selector, OP_READ);
-        } catch (ClosedChannelException e) {
-            throw new RuntimeException(e);
+        } catch (IOException exception) {
+            Object object = key.attachment();
+            if (object != null) {
+                HttpServletResponse response = (HttpServletResponse) object;
+                response.setStatus(INTERNAL_SERVER_ERROR);
+            }
         }
     }
 }

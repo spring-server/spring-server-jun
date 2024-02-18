@@ -66,22 +66,25 @@ public class MyInfoView implements View {
         InputStream inputStream,
         ModelMap modelMap
     ) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
-        int bytesRead;
-        while ((bytesRead = inputStream.read(buffer)) != EMPTY) {
-            byteArrayOutputStream.write(buffer, BASE_OFFSET, bytesRead);
-        }
-        String convertedHtml = getConvertedHtml(modelMap, byteArrayOutputStream);
+        String convertedHtml = getConvertedHtml(inputStream, modelMap);
         return convertedHtml.getBytes(UTF_8);
     }
 
     private static String getConvertedHtml(
-        ModelMap modelMap,
-        ByteArrayOutputStream byteArrayOutputStream
-    ) {
-        Object username = modelMap.getAttribute("username");
-        Object password = modelMap.getAttribute("password");
+        InputStream inputStream,
+        ModelMap modelMap
+    ) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+
+        int bytesRead;
+        while ((bytesRead = inputStream.read(buffer)) != EMPTY) {
+            byteArrayOutputStream.write(buffer, BASE_OFFSET, bytesRead);
+        }
+
+        String[] keys = modelMap.keys();
+        Object username = modelMap.getAttribute(keys[0]);
+        Object password = modelMap.getAttribute(keys[1]);
 
         String htmlPage = byteArrayOutputStream.toString(UTF_8);
         String replacedUsernameHtml = htmlPage.replace(MASKING, username.toString());

@@ -1,6 +1,9 @@
 package project.server.mvc.servlet;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import project.server.mvc.servlet.http.Cookie;
 import project.server.mvc.servlet.http.HttpHeaders;
 import project.server.mvc.servlet.http.HttpStatus;
@@ -14,6 +17,13 @@ public class Response implements HttpServletResponse {
     private final ResponseBody responseBody;
     private final SocketChannel socketChannel;
 
+    public Response() {
+        this.statusLine = new StatusLine();
+        this.socketChannel = null;
+        this.headers = new HttpHeaders();
+        this.responseBody = new ResponseBody();
+    }
+
     public Response(SocketChannel socketChannel) {
         this.statusLine = new StatusLine();
         this.socketChannel = socketChannel;
@@ -21,18 +31,9 @@ public class Response implements HttpServletResponse {
         this.responseBody = new ResponseBody();
     }
 
-    public Response() {
-        this(null);
-    }
-
     @Override
     public String getHttpHeaderLine() {
         return String.format("%s%s", statusLine, headers);
-    }
-
-    @Override
-    public SocketChannel getSocketChannel() {
-        return socketChannel;
     }
 
     @Override
@@ -61,6 +62,22 @@ public class Response implements HttpServletResponse {
     @Override
     public void setBody(String body) {
         this.responseBody.setBody(body);
+    }
+
+    @Override
+    public void write(String data) throws IOException {
+        ByteBuffer headerBuffer = ByteBuffer.wrap(data.getBytes(UTF_8));
+        while (headerBuffer.hasRemaining()) {
+            socketChannel.write(headerBuffer);
+        }
+    }
+
+    @Override
+    public void write(byte[] data) throws IOException {
+        ByteBuffer buffer = ByteBuffer.wrap(data);
+        while (buffer.hasRemaining()) {
+            socketChannel.write(buffer);
+        }
     }
 
     @Override
