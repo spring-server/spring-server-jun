@@ -10,6 +10,7 @@ import project.server.app.core.domain.user.User;
 import project.server.app.core.web.user.application.UserDeleteUseCase;
 import project.server.app.core.web.user.application.UserSaveUseCase;
 import project.server.app.core.web.user.application.UserSearchUseCase;
+import project.server.app.core.web.user.application.UserUpdateUseCase;
 import project.server.jdbc.core.exception.DataAccessException;
 import static project.server.jdbc.core.transaction.DefaultTransactionDefinition.createTransactionDefinition;
 import project.server.jdbc.core.transaction.PlatformTransactionManager;
@@ -18,7 +19,7 @@ import project.server.mvc.springframework.annotation.Component;
 
 @Slf4j
 @Component
-public class UserServiceProxy implements UserSaveUseCase, UserSearchUseCase, UserDeleteUseCase {
+public class UserServiceProxy implements UserSaveUseCase, UserSearchUseCase, UserUpdateUseCase, UserDeleteUseCase {
 
     private final PlatformTransactionManager txManager;
     private final UserService target;
@@ -63,6 +64,24 @@ public class UserServiceProxy implements UserSaveUseCase, UserSearchUseCase, Use
             txManager.commit(txStatus);
             log.debug("Transaction finished.");
             return findUser;
+        } catch (BusinessException | DataAccessException exception) {
+            txManager.rollback(txStatus);
+            log.error("{}", exception.getMessage());
+            throw exception;
+        }
+    }
+
+    @Override
+    public void update(
+        LoginUser loginUser,
+        String password
+    ) {
+        TransactionStatus txStatus = getTransactionStatus(true);
+        log.debug("txStatus:[{}]", txStatus.getTransaction());
+        try {
+            target.update(loginUser, password);
+            txManager.commit(txStatus);
+            log.debug("Transaction finished.");
         } catch (BusinessException | DataAccessException exception) {
             txManager.rollback(txStatus);
             log.error("{}", exception.getMessage());
