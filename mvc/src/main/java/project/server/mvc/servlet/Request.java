@@ -20,12 +20,6 @@ public class Request implements HttpServletRequest {
     private final HttpHeaders headers;
     private final RequestBody requestBody;
 
-    public Request(BufferedReader bufferedReader) throws IOException {
-        this.requestLine = parseRequestLine(bufferedReader);
-        this.headers = parseHttpHeaders(bufferedReader);
-        this.requestBody = parseRequestBody(bufferedReader);
-    }
-
     public Request(
         RequestLine requestLine,
         HttpHeaders headers,
@@ -103,7 +97,7 @@ public class Request implements HttpServletRequest {
     }
 
     @Override
-    public String getAttribute(String key) {
+    public Object getAttribute(String key) {
         return requestBody.getAttribute(key);
     }
 
@@ -115,6 +109,14 @@ public class Request implements HttpServletRequest {
     @Override
     public String getHeader(String key) {
         return headers.getHeaderValue(key);
+    }
+
+    @Override
+    public void setAttribute(
+        String key,
+        Object value
+    ) {
+        requestBody.setAttribute(key, value);
     }
 
     @Override

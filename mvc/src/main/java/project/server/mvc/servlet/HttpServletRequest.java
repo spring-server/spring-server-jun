@@ -21,9 +21,11 @@ public interface HttpServletRequest extends ServletRequest {
 
     RequestBody getRequestBody();
 
-    String getAttribute(String key);
+    Object getAttribute(String key);
 
     Cookies getCookies();
 
     String getHeader(String key);
+
+    void setAttribute(String key, Object value);
 }
