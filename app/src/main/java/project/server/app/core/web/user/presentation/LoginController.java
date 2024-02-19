@@ -9,6 +9,7 @@ import project.server.mvc.servlet.HttpServletResponse;
 import project.server.mvc.servlet.http.Cookie;
 import static project.server.mvc.servlet.http.HttpStatus.MOVE_PERMANENTLY;
 import project.server.mvc.springframework.annotation.Controller;
+import project.server.mvc.springframework.annotation.PostMapping;
 import project.server.mvc.springframework.web.servlet.Handler;
 import project.server.mvc.springframework.web.servlet.ModelAndView;
 
@@ -30,12 +31,13 @@ public class LoginController implements Handler {
     }
 
     @Override
+    @PostMapping(path = "/sign-in")
     public ModelAndView process(
         HttpServletRequest request,
         HttpServletResponse response
     ) {
-        String username = request.getAttribute("username");
-        String password = request.getAttribute("password");
+        String username = (String) request.getAttribute("username");
+        String password = (String) request.getAttribute("password");
         log.info("username: {}, password: {}", username, password);
 
         validator.validateLoginInfo(username, password);
