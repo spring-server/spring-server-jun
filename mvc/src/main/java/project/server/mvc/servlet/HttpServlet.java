@@ -29,7 +29,6 @@ public abstract class HttpServlet extends GenericServlet {
         }
         if (method.isPost()) {
             doPost(request, response);
-            return;
         }
     }
 

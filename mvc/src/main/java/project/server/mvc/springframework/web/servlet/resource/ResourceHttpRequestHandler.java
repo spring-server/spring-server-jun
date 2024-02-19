@@ -21,6 +21,7 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler {
     private static final String HTML = ".html";
     private static final String STATIC_PREFIX = "static";
 
+
     @Override
     public void handleRequest(
         HttpServletRequest request,
@@ -34,6 +35,7 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler {
                 return;
             }
         }
+
         InputStream inputStream = getInputStream(getFile(uri));
         if (inputStream != null) {
             response(request, response, inputStream);

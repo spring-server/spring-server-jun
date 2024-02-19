@@ -1,29 +1,28 @@
 package project.server.mvc.springframework.web.servlet;
 
 import java.util.List;
+import static java.util.List.of;
 import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
 import project.server.mvc.servlet.ServletException;
+import static project.server.mvc.springframework.context.ApplicationContext.getBean;
 import project.server.mvc.springframework.web.servlet.mvc.method.RequestMappingHandlerMapping;
 import project.server.mvc.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 public class DispatcherServlet extends FrameworkServlet {
 
-    private final List<HandlerMapping> handlerMappings;
-    private final List<HandlerAdapter> handlerAdapters;
-    private final List<ViewResolver> viewResolvers;
-    private final GlobalExceptionHandler exceptionHandler;
+    private List<HandlerMapping> handlerMappings;
+    private List<HandlerAdapter> handlerAdapters;
+    private List<ViewResolver> viewResolvers;
+    private GlobalExceptionHandler exceptionHandler;
 
     public DispatcherServlet() {
-        this.handlerMappings = List.of(new RequestMappingHandlerMapping());
-        this.handlerAdapters = List.of(new RequestMappingHandlerAdapter());
-        this.viewResolvers = List.of(new BeanNameViewResolver());
-        this.exceptionHandler = new GlobalExceptionHandler();
+        init();
     }
 
     @Override
     public void init() {
-        super.init();
+        initStrategies();
     }
 
     @Override
@@ -43,6 +42,9 @@ public class DispatcherServlet extends FrameworkServlet {
             if (handler == null) {
                 return;
             }
+
+            // 구현 편의를 위해 반환타입을 void로 지정
+            handler.applyPreHandle(request, response);
 
             HandlerAdapter handlerAdapter = getHandlerAdapter(handler.getHandler());
             ModelAndView modelAndView = handlerAdapter.handle(request, response, handler.getHandler());
@@ -105,6 +107,32 @@ public class DispatcherServlet extends FrameworkServlet {
             }
         }
         return null;
+    }
+
+    private void initStrategies() {
+        initHandlerMappings();
+        initHandlerAdapters();
+        initViewResolvers();
+        initExceptionHandler();
+    }
+
+    private void initHandlerMappings() {
+        super.init();
+        RequestMappingHandlerMapping bean = getBean(RequestMappingHandlerMapping.class);
+        this.handlerMappings = of(bean);
+    }
+
+    private void initHandlerAdapters() {
+        RequestMappingHandlerAdapter bean = getBean(RequestMappingHandlerAdapter.class);
+        this.handlerAdapters = of(bean);
+    }
+
+    private void initViewResolvers() {
+        this.viewResolvers = of(new BeanNameViewResolver());
+    }
+
+    private void initExceptionHandler() {
+        this.exceptionHandler = new GlobalExceptionHandler();
     }
 
     @Override

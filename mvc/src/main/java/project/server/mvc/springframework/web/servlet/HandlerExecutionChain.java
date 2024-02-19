@@ -1,10 +1,23 @@
 package project.server.mvc.springframework.web.servlet;
 
+import java.util.List;
 import java.util.Objects;
+import project.server.mvc.servlet.HttpServletRequest;
+import project.server.mvc.servlet.HttpServletResponse;
+import project.server.mvc.springframework.handler.HandlerInterceptor;
 
 public class HandlerExecutionChain {
 
+    private List<HandlerInterceptor> interceptors;
     private final Object handler;
+
+    public HandlerExecutionChain(
+        List<HandlerInterceptor> interceptors,
+        Object handler
+    ) {
+        this.interceptors = interceptors;
+        this.handler = handler;
+    }
 
     public HandlerExecutionChain(Object handler) {
         this.handler = handler;
@@ -12,6 +25,18 @@ public class HandlerExecutionChain {
 
     public Object getHandler() {
         return handler;
+    }
+
+    void applyPreHandle(
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) {
+        if (interceptors == null || interceptors.isEmpty()) {
+            return;
+        }
+        for (HandlerInterceptor interceptor : interceptors) {
+            interceptor.preHandle(request, response, handler);
+        }
     }
 
     @Override
@@ -33,6 +58,6 @@ public class HandlerExecutionChain {
 
     @Override
     public String toString() {
-        return String.format("%s", handler);
+        return String.format("handler:%s, interceptors:%s", handler, interceptors);
     }
 }
