@@ -11,8 +11,4 @@ public class ApplicationContextProvider {
     public static ApplicationContext getApplicationContext() {
         return applicationContext;
     }
-
-    public static <T> T getBean(String beanName) {
-        return ApplicationContext.getBean(beanName);
-    }
 }

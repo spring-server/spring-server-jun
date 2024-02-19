@@ -1,12 +1,15 @@
 package project.server.mvc.springframework.context;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import static java.lang.reflect.Modifier.isStatic;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -116,12 +119,6 @@ public class ApplicationContext {
         }
     }
 
-    public static <T> T getBean(String beanName) {
-        @SuppressWarnings("unchecked")
-        T bean = (T) ApplicationContext.nameKeyBeans.get(beanName);
-        return bean;
-    }
-
     private void add(Class<?> clazz) throws Exception {
         if (clazzKeyBeans.containsKey(clazz) || allBeans.contains(clazz)) {
             return;
@@ -193,6 +190,29 @@ public class ApplicationContext {
 
     public static <T> T getBean(Class<T> clazz) {
         return clazz.cast(dependencyInjectedBeans.get(clazz));
+    }
+
+    public static <T> void register(T t) {
+        dependencyInjectedBeans.put(t.getClass(), t);
+    }
+
+    public static <T> T getBean(String beanName) {
+        @SuppressWarnings("unchecked")
+        T bean = (T) ApplicationContext.nameKeyBeans.get(beanName);
+        return bean;
+    }
+
+    public static Collection<Object> findByAnnotation(Class<? extends Annotation> clazz) {
+        List<Object> beans = new ArrayList<>();
+        for (Object bean : dependencyInjectedBeans.values()) {
+            Annotation[] annotations = bean.getClass().getAnnotations();
+            for (Annotation annotation : annotations) {
+                if (annotation.annotationType().equals(clazz)) {
+                    beans.add(bean);
+                }
+            }
+        }
+        return beans;
     }
 
     public static Collection<Object> getAllDependencyInjectedInstances() {

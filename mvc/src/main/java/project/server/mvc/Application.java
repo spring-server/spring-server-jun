@@ -21,8 +21,7 @@ public class Application {
     }
 
     private void initContext(String packages) throws Exception {
-        ApplicationContext context;
-        context = new ApplicationContext(packages);
+        ApplicationContext context = new ApplicationContext(packages);
         ApplicationContextProvider provider = new ApplicationContextProvider();
         provider.setApplicationContext(context);
     }
