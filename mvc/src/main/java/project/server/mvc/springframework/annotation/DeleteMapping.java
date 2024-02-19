@@ -8,10 +8,10 @@ import java.lang.annotation.Target;
 import project.server.mvc.servlet.http.HttpMethod;
 
 @Documented
-@Target({ElementType.TYPE_USE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@RequestMapping(method = HttpMethod.GET)
-public @interface GetMapping {
+@RequestMapping(method = HttpMethod.DELETE)
+@Target({ElementType.TYPE_USE, ElementType.METHOD})
+public @interface DeleteMapping {
 
     @AliasFor(annotation = RequestMapping.class)
     String name() default "";
