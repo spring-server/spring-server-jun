@@ -1,7 +1,6 @@
 package project.server.mvc.tomcat;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -15,7 +14,7 @@ import project.server.mvc.servlet.Response;
 import project.server.mvc.servlet.http.HttpHeaders;
 import project.server.mvc.servlet.http.RequestBody;
 import project.server.mvc.servlet.http.RequestLine;
-import static project.server.mvc.springframework.context.ApplicationContextProvider.getBean;
+import static project.server.mvc.springframework.context.ApplicationContext.getBean;
 import project.server.mvc.springframework.web.servlet.DispatcherServlet;
 
 @Slf4j
@@ -67,6 +66,7 @@ public class NioSocketWrapper implements Runnable {
                 }
             }
         } catch (Exception exception) {
+            responseError();
             log.error("message: {}", exception.getMessage());
         }
     }
@@ -103,5 +103,16 @@ public class NioSocketWrapper implements Runnable {
 
     public void flip() {
         buffer.flip();
+    }
+
+    private void responseError() {
+        ByteBuffer headerBuffer = ByteBuffer.wrap(response.toString().getBytes(UTF_8));
+        while (headerBuffer.hasRemaining()) {
+            try {
+                this.socketChannel.write(headerBuffer);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
