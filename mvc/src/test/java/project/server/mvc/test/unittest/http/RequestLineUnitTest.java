@@ -25,7 +25,7 @@ class RequestLineUnitTest {
         assertAll(
             () -> assertEquals(GET, requestLine.getHttpMethod()),
             () -> assertEquals("/index.html", requestLine.getRequestUri()),
-            () -> assertEquals("text/html", requestLine.getContentType()),
+            () -> assertEquals("text/html", requestLine.getContentTypeAsValue()),
             () -> assertEquals(HTTP_1_1.getValue(), "HTTP/1.1")
         );
     }

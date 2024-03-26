@@ -72,4 +72,13 @@ class UserValidatorUnitTest {
         HttpServletResponse response = new Response();
         assertDoesNotThrow(() -> validator.validateSessionId(1L, response));
     }
+
+    @Test
+    @DisplayName("세션이 존재하지 않으면 UnAuthorizedException이 발생한다.")
+    void sessionNullTest() {
+        HttpServletResponse response = new Response();
+        assertThatThrownBy(() -> validator.validateSession(null, response))
+            .isInstanceOf(RuntimeException.class)
+            .isExactlyInstanceOf(UnAuthorizedException.class);
+    }
 }
