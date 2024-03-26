@@ -10,6 +10,36 @@
 <br>
 <br>
 
+## 📝 프로그램 실행
+
+application.yml 파일/설정 추가 후 데이터베이스 설정 값 등록. 
+
+````yaml
+ spring:
+   datasource:
+     driver-class-name: ${DRIVER_CLASS_NAME}
+     url: ${URL}
+     username: ${USERNAME}
+     password: ${PASSWORD}
+````
+
+<br>
+<br>
+<br>
+<br>
+
+빌드 후 실행.
+
+```shell
+./gradlew build
+./gradlew bootJar
+```
+
+<br>
+<br>
+<br>
+<br>
+
 ## 📝 공통 요구사항
 
 1. 전체 미션은 4단계로 나뉘어져 있으며, 각 Step에는 `필수/선택 구현 사항`, `학습 목표`가 주어집니다.
@@ -101,7 +131,7 @@
 <br>
 <br>
 
-## Step4. 데이터 전송 방식 변경
+## Step4. 데이터 전송 방식을 일부 변경한다.
 
 매 번 정적 리소스를 가져오는 것은 비효율적이기 때문에, 한 페이지에서 일부 데이터만 변경할 수 있도록, 데이터 전송 방식을 변경한다.
 
