@@ -92,5 +92,5 @@ task downloadYml {
 }
 
 tasks.named("downloadYml") {
-    dependsOn downloadYml
+    dependsOn compileJava
 }
