@@ -98,12 +98,12 @@
     document.querySelector('.sign-up-container form').addEventListener('submit', function (event) {
         event.preventDefault();
         var xhr = new XMLHttpRequest();
-        xhr.open("POST", "http://localhost:8086/sign-up", true);
+        xhr.open("POST", "http://localhost:8080/sign-up", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.onload = function () {
             if (xhr.status === 200 || xhr.status === 301) {
                 alert("회원가입이 완료되었습니다.");
-                window.location.href = "http://localhost:8086/sign-in.html";
+                window.location.href = "http://localhost:8080/sign-in.html";
             } else {
                 alert("회원가입에 실패했습니다.");
             }
@@ -121,17 +121,12 @@
         event.preventDefault();
 
         var xhr = new XMLHttpRequest();
-        xhr.open("POST", "http://localhost:8086/sign-in", true);
+        xhr.open("POST", "http://localhost:8080/sign-in", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.onload = function () {
             if (xhr.status === 200 || xhr.status === 301) {
-                // var logined = xhr.getResponseHeader("logined");
-                // if (logined) {
                 localStorage.setItem("logined", true);
-                window.location.href = "http://localhost:8086/";
-                // } else {
-                //     alert("로그인에 실패했습니다.");
-                // }
+                window.location.href = "http://localhost:8080/";
             } else {
                 alert("Error: " + xhr.status);
             }
