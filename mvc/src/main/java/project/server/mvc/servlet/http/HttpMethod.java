@@ -32,4 +32,8 @@ public enum HttpMethod {
     public boolean isPost() {
         return this.equals(POST);
     }
+
+    public boolean isPut() {
+        return this.equals(PUT);
+    }
 }

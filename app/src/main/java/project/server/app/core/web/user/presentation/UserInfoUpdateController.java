@@ -8,12 +8,13 @@ import project.server.app.core.web.user.presentation.validator.UserValidator;
 import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
 import static project.server.mvc.servlet.http.HttpStatus.OK;
-import project.server.mvc.springframework.annotation.Controller;
+import project.server.mvc.springframework.annotation.PutMapping;
+import project.server.mvc.springframework.annotation.RestController;
 import project.server.mvc.springframework.web.servlet.Handler;
 import project.server.mvc.springframework.web.servlet.ModelAndView;
 
 @Slf4j
-@Controller
+@RestController
 public class UserInfoUpdateController implements Handler {
 
     private final UserValidator validator;
@@ -31,6 +32,7 @@ public class UserInfoUpdateController implements Handler {
     }
 
     @Override
+    @PutMapping(path = "/api/users")
     public ModelAndView process(
         HttpServletRequest request,
         HttpServletResponse response

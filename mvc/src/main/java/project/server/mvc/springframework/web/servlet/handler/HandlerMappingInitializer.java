@@ -1,6 +1,7 @@
 package project.server.mvc.springframework.web.servlet.handler;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import project.server.mvc.springframework.annotation.DeleteMapping;
 import project.server.mvc.springframework.annotation.GetMapping;
 import project.server.mvc.springframework.annotation.PostMapping;
 import project.server.mvc.springframework.annotation.PutMapping;
+import project.server.mvc.springframework.annotation.RestController;
 import static project.server.mvc.springframework.context.ApplicationContext.findByAnnotation;
 import project.server.mvc.springframework.handler.RequestMappingInfo;
 import project.server.mvc.springframework.web.method.HandlerMethod;
@@ -20,10 +22,16 @@ public class HandlerMappingInitializer {
     private Map<RequestMappingInfo, AbstractHandlerMethodMapping.MappingRegistration> registry = new HashMap<>();
 
     public HandlerMappingInitializer() {
-        List<Handler> handlers = findByAnnotation(Controller.class).stream()
+        List<Handler> handlers = new ArrayList<>();
+        List<Handler> restController = findByAnnotation(RestController.class).stream()
+            .map(bean -> (Handler) bean)
+            .toList();
+        List<Handler> controller = findByAnnotation(Controller.class).stream()
             .map(bean -> (Handler) bean)
             .toList();
 
+        handlers.addAll(controller);
+        handlers.addAll(restController);
         for (Handler handler : handlers) {
             registerHandlerMethod(handler);
         }

@@ -51,7 +51,7 @@ public class MyInfoView implements View {
         HttpServletResponse response,
         int lengthOfBodyContent
     ) {
-        response.setHeader(CONTENT_TYPE, request.getContentType());
+        response.setHeader(CONTENT_TYPE, request.getContentTypeAsString());
         response.setHeader(CONTENT_LENGTH, valueOf(lengthOfBodyContent));
     }
 

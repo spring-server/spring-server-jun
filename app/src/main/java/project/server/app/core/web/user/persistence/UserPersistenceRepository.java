@@ -13,11 +13,12 @@ import project.server.app.common.configuration.DatabaseConfiguration;
 import project.server.app.core.domain.user.User;
 import project.server.app.core.domain.user.UserRepository;
 import project.server.jdbc.core.exception.DataAccessException;
+import project.server.jdbc.core.jdbc.JdbcHelper;
 import static project.server.jdbc.core.jdbc.JdbcHelper.insert;
 import static project.server.jdbc.core.jdbc.JdbcHelper.selectAll;
 import static project.server.jdbc.core.jdbc.JdbcHelper.selectBy;
 import static project.server.jdbc.core.jdbc.JdbcHelper.truncate;
-import static project.server.jdbc.core.jdbc.JdbcHelper.update;
+import static project.server.jdbc.core.jdbc.JdbcHelper.updatePassword;
 import project.server.jdbc.core.jdbc.JdbcTemplate;
 import project.server.jdbc.core.jdbc.RowMapper;
 import project.server.mvc.springframework.annotation.Repository;
@@ -89,8 +90,22 @@ public class UserPersistenceRepository implements UserRepository {
     }
 
     @Override
+    public void update(
+        Long id,
+        String password
+    ) {
+        String sql = updatePassword(User.class, "password");
+        jdbcTemplate.queryForObject(sql, pstmt -> {
+            pstmt.setString(1, password);
+            pstmt.setLong(2, id);
+            pstmt.executeUpdate();
+            return null;
+        });
+    }
+
+    @Override
     public void delete(User user) {
-        String sql = update(User.class, "deleted");
+        String sql = JdbcHelper.update(User.class, "deleted");
         jdbcTemplate.queryForObject(sql, pstmt -> {
             pstmt.setLong(1, user.getId());
             pstmt.executeUpdate();

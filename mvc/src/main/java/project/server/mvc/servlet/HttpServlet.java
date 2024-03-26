@@ -14,7 +14,6 @@ public abstract class HttpServlet extends GenericServlet {
 
         httpServletRequest = (HttpServletRequest) request;
         httpServletResponse = (HttpServletResponse) response;
-
         service(httpServletRequest, httpServletResponse);
     }
 
@@ -29,6 +28,10 @@ public abstract class HttpServlet extends GenericServlet {
         }
         if (method.isPost()) {
             doPost(request, response);
+            return;
+        }
+        if (method.isPut()) {
+            doPut(request, response);
         }
     }
 
@@ -36,5 +39,8 @@ public abstract class HttpServlet extends GenericServlet {
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    }
+
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws Exception {
     }
 }

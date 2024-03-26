@@ -3,8 +3,6 @@ package project.server.mvc.springframework.web.servlet.resource;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
 import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
 import static project.server.mvc.servlet.http.HttpStatus.NOT_FOUND;
@@ -91,7 +89,7 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler {
         int lengthOfBodyContent
     ) throws IOException {
         response.getHttpHeaderLine();
-        response.setHeader(CONTENT_TYPE, request.getContentType());
+        response.setHeader(CONTENT_TYPE, request.getContentTypeAsString());
         response.setHeader(CONTENT_LENGTH, String.valueOf(lengthOfBodyContent));
 
         String header = response.getHttpHeaderLine();

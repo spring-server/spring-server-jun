@@ -1,6 +1,7 @@
 package project.server.mvc.springframework.web.servlet.handler;
 
 import java.util.Map;
+import java.util.Objects;
 import project.server.mvc.servlet.HttpServletRequest;
 import static project.server.mvc.springframework.context.ApplicationContext.getBean;
 import project.server.mvc.springframework.handler.RequestMappingInfo;
@@ -39,9 +40,8 @@ public abstract class AbstractHandlerMethodMapping extends AbstractHandlerMappin
         private final Map<RequestMappingInfo, MappingRegistration> registry;
 
         public MappingRegistry() {
-            Object bean = getBean(HandlerMappingInitializer.class);
-            HandlerMappingInitializer handlerMappingInitializer = (HandlerMappingInitializer) bean;
-            this.registry = handlerMappingInitializer.getRegistry();
+            HandlerMappingInitializer bean = getBean(HandlerMappingInitializer.class);
+            this.registry = bean.getRegistry();
         }
 
         public MappingRegistration getMappingRegistration(RequestMappingInfo requestMappingInfo) {
@@ -59,6 +59,28 @@ public abstract class AbstractHandlerMethodMapping extends AbstractHandlerMappin
 
         public HandlerMethod getHandlerMethod() {
             return handlerMethod;
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (object == null || getClass() != object.getClass()) {
+                return false;
+            }
+            MappingRegistration that = (MappingRegistration) object;
+            return handlerMethod.equals(that.handlerMethod);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(handlerMethod);
+        }
+
+        @Override
+        public String toString() {
+            return String.format("method: %s", handlerMethod);
         }
     }
 }

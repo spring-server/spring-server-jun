@@ -1,9 +1,7 @@
 package project.server.mvc.servlet;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
+import project.server.mvc.servlet.http.ContentType;
 import project.server.mvc.servlet.http.Cookies;
 import project.server.mvc.servlet.http.HttpHeader;
 import project.server.mvc.servlet.http.HttpHeaders;
@@ -13,7 +11,6 @@ import project.server.mvc.servlet.http.RequestLine;
 
 public class Request implements HttpServletRequest {
 
-    private static final String EMPTY_STRING = "";
     private static final String HOST = "Host";
 
     private final RequestLine requestLine;
@@ -28,31 +25,6 @@ public class Request implements HttpServletRequest {
         this.requestLine = requestLine;
         this.headers = headers;
         this.requestBody = requestBody;
-    }
-
-    private RequestLine parseRequestLine(BufferedReader bufferedReader) throws IOException {
-        return new RequestLine(bufferedReader.readLine());
-    }
-
-    private HttpHeaders parseHttpHeaders(BufferedReader bufferedReader) throws IOException {
-        List<String> headerLines = new ArrayList<>();
-        String headerLine = "";
-
-        while (!EMPTY_STRING.equals(headerLine = bufferedReader.readLine())) {
-            headerLines.add(headerLine);
-        }
-        return new HttpHeaders(headerLines);
-    }
-
-    private RequestBody parseRequestBody(BufferedReader bufferedReader) throws IOException {
-        int contentLength = headers.getContentLength();
-        if (contentLength == 0) {
-            return null;
-        }
-
-        char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        return new RequestBody(new String(buffer));
     }
 
     @Override
@@ -72,8 +44,13 @@ public class Request implements HttpServletRequest {
     }
 
     @Override
-    public String getContentType() {
+    public ContentType getContentType() {
         return requestLine.getContentType();
+    }
+
+    @Override
+    public String getContentTypeAsString() {
+        return requestLine.getContentTypeAsValue();
     }
 
     @Override
@@ -117,6 +94,11 @@ public class Request implements HttpServletRequest {
         Object value
     ) {
         requestBody.setAttribute(key, value);
+    }
+
+    @Override
+    public boolean isContentType(ContentType contentType) {
+        return this.headers.isContentType(contentType);
     }
 
     @Override

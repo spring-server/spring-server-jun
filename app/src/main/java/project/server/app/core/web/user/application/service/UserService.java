@@ -51,7 +51,7 @@ public class UserService implements UserSaveUseCase, UserSearchUseCase, UserUpda
     ) {
         User findUser = userRepository.findById(loginUser.getUserId())
             .orElseThrow(UserNotFoundException::new);
-
+        userRepository.update(findUser.getId(), password);
     }
 
     @Override

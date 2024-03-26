@@ -33,14 +33,30 @@ public abstract class FrameworkServlet extends HttpServletBean {
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
-        if (isUnAuthStaticResource(request)) {
+        if (isStaticResource(request)) {
             processStaticRequest(request, response);
             return;
         }
         processRequest(request, response);
     }
 
-    private boolean isUnAuthStaticResource(HttpServletRequest request) {
+    @Override
+    protected void doPost(
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) throws Exception {
+        processRequest(request, response);
+    }
+
+    @Override
+    protected void doPut(
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) throws Exception {
+        processRequest(request, response);
+    }
+
+    private boolean isStaticResource(HttpServletRequest request) {
         String uri = request.getRequestUri();
         String[] parsedUri = uri.split("/");
         for (String eachUri : parsedUri) {
@@ -78,14 +94,6 @@ public abstract class FrameworkServlet extends HttpServletBean {
         HttpServletResponse response
     ) throws Exception {
         doService(request, response);
-    }
-
-    @Override
-    protected void doPost(
-        HttpServletRequest request,
-        HttpServletResponse response
-    ) throws Exception {
-        processRequest(request, response);
     }
 
     protected abstract void doService(HttpServletRequest request, HttpServletResponse response) throws Exception;

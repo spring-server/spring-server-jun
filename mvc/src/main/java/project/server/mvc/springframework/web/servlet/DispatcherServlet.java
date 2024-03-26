@@ -5,6 +5,7 @@ import static java.util.List.of;
 import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
 import project.server.mvc.servlet.ServletException;
+import static project.server.mvc.servlet.http.ContentType.APPLICATION_JSON;
 import static project.server.mvc.springframework.context.ApplicationContext.getBean;
 import project.server.mvc.springframework.web.servlet.mvc.method.RequestMappingHandlerMapping;
 import project.server.mvc.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
@@ -84,6 +85,12 @@ public class DispatcherServlet extends FrameworkServlet {
         HttpServletResponse response,
         ModelAndView modelAndView
     ) throws Exception {
+        if (modelAndView == null) {
+            if (request.isContentType(APPLICATION_JSON)) {
+                return;
+            }
+            throw new RuntimeException("올바르지 않은 요청입니다.");
+        }
         render(modelAndView, request, response);
     }
 

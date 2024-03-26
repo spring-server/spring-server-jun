@@ -18,7 +18,7 @@ public class RequestLine {
     private final HttpMethod httpMethod;
     private final RequestUri requestUri;
     private final HttpVersion httpVersion;
-    private String contentType;
+    private ContentType contentType;
 
     public RequestLine(String startLine) {
         String[] startLineArray = startLine.split(DELIMITER);
@@ -64,12 +64,12 @@ public class RequestLine {
         return startLineArray.length >= 2;
     }
 
-    private String getContentType(String filePath) {
+    private ContentType getContentType(String filePath) {
         String contentType = URLConnection.guessContentTypeFromName(filePath);
         if (contentType == null) {
             contentType = OCTET_STREAM;
         }
-        return contentType;
+        return ContentType.findByType(contentType);
     }
 
     public HttpMethod getHttpMethod() {
@@ -80,8 +80,20 @@ public class RequestLine {
         return requestUri.url();
     }
 
-    public String getContentType() {
+    public ContentType getContentType() {
         return contentType;
+    }
+
+    public String getHttpVersionAsString() {
+        return httpVersion.getValue();
+    }
+
+    public String getContentTypeAsValue() {
+        return contentType.getValue();
+    }
+
+    public boolean isDataFormat(ContentType contentType) {
+        return this.contentType.equals(contentType);
     }
 
     @Override
@@ -96,10 +108,6 @@ public class RequestLine {
         return httpMethod == that.httpMethod
             && requestUri.equals(that.requestUri)
             && httpVersion == that.httpVersion;
-    }
-
-    public String getHttpVersionAsString() {
-        return httpVersion.getValue();
     }
 
     @Override

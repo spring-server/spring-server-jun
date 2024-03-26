@@ -22,6 +22,29 @@ public class RequestBody {
         this.attributes = parseBody(body);
     }
 
+    public RequestBody(Map<String, Object> attributes) {
+        this.attributes = attributes;
+    }
+
+    public static RequestBody createJsonRequestBody(String body) {
+        if (body == null || body.isBlank()) {
+            return new RequestBody(new HashMap<>());
+        }
+
+        String parsedBody = body.replaceAll("\"", "")
+            .replaceAll("\\{", "")
+            .replaceAll("}", "");
+
+        Map<String, Object> attribute = new HashMap<>();
+
+        String[] bodyArray = parsedBody.split(",");
+        for (String eachBody : bodyArray) {
+            String[] element = eachBody.split(":");
+            attribute.put(element[KEY], element[VALUE]);
+        }
+        return new RequestBody(attribute);
+    }
+
     private Map<String, Object> parseBody(String body) {
         Map<String, Object> attributes = new HashMap<>();
         String[] bodyArray = body.split(VALUES_DELIMITER);

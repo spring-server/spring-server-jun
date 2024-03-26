@@ -68,8 +68,8 @@
                 password: document.getElementById('password').value
             };
 
-            fetch('URL', {
-                method: 'POST',
+            fetch('http://localhost:8086/api/users', {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },

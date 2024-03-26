@@ -11,8 +11,10 @@ import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
 import project.server.mvc.servlet.Request;
 import project.server.mvc.servlet.Response;
+import static project.server.mvc.servlet.http.ContentType.APPLICATION_JSON;
 import project.server.mvc.servlet.http.HttpHeaders;
 import project.server.mvc.servlet.http.RequestBody;
+import static project.server.mvc.servlet.http.RequestBody.createJsonRequestBody;
 import project.server.mvc.servlet.http.RequestLine;
 import static project.server.mvc.springframework.context.ApplicationContext.getBean;
 import project.server.mvc.springframework.web.servlet.DispatcherServlet;
@@ -56,7 +58,6 @@ public class NioSocketWrapper implements Runnable {
             try (SocketChannel channel = this.socketChannel) {
                 HttpServletRequest request = createHttpServletRequest(lines, headerLines, requestBody);
                 HttpServletResponse response = new Response(channel);
-
                 this.response = response;
                 dispatcherServlet.service(request, response);
 
@@ -90,9 +91,19 @@ public class NioSocketWrapper implements Runnable {
         List<String> headerLines,
         String requestBody
     ) {
+        RequestLine requestLine = new RequestLine(lines[START_LINE]);
+        HttpHeaders httpHeaders = new HttpHeaders(headerLines);
+        if (httpHeaders.isContentType(APPLICATION_JSON)) {
+            RequestBody body = createJsonRequestBody(requestBody);
+            return new Request(
+                requestLine,
+                httpHeaders,
+                body
+            );
+        }
         return new Request(
-            new RequestLine(lines[START_LINE]),
-            new HttpHeaders(headerLines),
+            requestLine,
+            httpHeaders,
             new RequestBody(requestBody)
         );
     }
