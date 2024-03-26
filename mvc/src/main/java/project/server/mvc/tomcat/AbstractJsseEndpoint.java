@@ -9,5 +9,5 @@ public abstract class AbstractJsseEndpoint<U> extends AbstractEndpoint<U> {
     }
 
     @Override
-    abstract protected boolean setSocketOptions(U socket);
+    protected abstract boolean setSocketOptions(U socket);
 }

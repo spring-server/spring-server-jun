@@ -24,8 +24,8 @@ public class UserRowMapper implements RowMapper<User> {
         String username = rs.getString(USERNAME);
         String password = rs.getString(PASSWORD);
         LocalDateTime createdAt = rs.getTimestamp(CREATED_AT).toLocalDateTime();
-        LocalDateTime lastModifiedAt = rs.getTimestamp(LAST_MODIFIED_AT) != null ?
-            rs.getTimestamp(LAST_MODIFIED_AT).toLocalDateTime() : null;
+        LocalDateTime lastModifiedAt = rs.getTimestamp(LAST_MODIFIED_AT) != null
+            ? rs.getTimestamp(LAST_MODIFIED_AT).toLocalDateTime() : null;
         Deleted deleted = Deleted.valueOf(rs.getString(DELETED));
         return new User(id, username, password, createdAt, lastModifiedAt, deleted);
     }

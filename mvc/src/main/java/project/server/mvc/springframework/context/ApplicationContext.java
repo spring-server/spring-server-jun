@@ -192,8 +192,8 @@ public class ApplicationContext {
         return clazz.cast(dependencyInjectedBeans.get(clazz));
     }
 
-    public static <T> void register(T t) {
-        dependencyInjectedBeans.put(t.getClass(), t);
+    public static <T> void register(T type) {
+        dependencyInjectedBeans.put(type.getClass(), type);
     }
 
     public static <T> T getBean(String beanName) {
