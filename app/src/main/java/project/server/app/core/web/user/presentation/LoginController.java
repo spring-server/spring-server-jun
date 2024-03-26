@@ -38,7 +38,6 @@ public class LoginController implements Handler {
     ) {
         String username = (String) request.getAttribute("username");
         String password = (String) request.getAttribute("password");
-        log.info("username: {}, password: {}", username, password);
 
         validator.validateLoginInfo(username, password);
         Session session = userLoginUseCase.login(username, password);
