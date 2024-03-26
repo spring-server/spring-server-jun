@@ -28,6 +28,6 @@ public class WebConfiguration implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new SessionCheckHandlerInterceptor(validator, loginUseCase))
-            .addPathPatterns("/my-info.html", "/my-info");
+            .addPathPatterns("/my-info.html", "/my-info", "/api/users");
     }
 }
