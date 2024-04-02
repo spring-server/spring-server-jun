@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import static java.util.stream.Collectors.joining;
-import static project.server.mvc.servlet.http.ContentType.APPLICATION_JSON;
 
 public class HttpHeaders {
 
@@ -132,12 +131,12 @@ public class HttpHeaders {
     }
 
     public boolean isContentType(ContentType contentType) {
-        List<HttpHeader> contentTypeHeader = headers.get(contentType.getValue());
+        List<HttpHeader> contentTypeHeader = headers.get("Content-Type");
         if (contentTypeHeader == null || contentTypeHeader.isEmpty()) {
             return false;
         }
         Optional<HttpHeader> findApplicationJson = contentTypeHeader.stream()
-            .filter(header -> header.getValue().equals(APPLICATION_JSON.getValue()))
+            .filter(header -> header.getValue().equals(contentType.getValue()))
             .findAny();
         return findApplicationJson.isPresent();
     }

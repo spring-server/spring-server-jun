@@ -9,7 +9,7 @@ public enum ContentType {
     TEXT_JS("js", "text/javascript"),
     IMAGE_JPEG("jpeg", "image/jpeg"),
     IMAGE_PNG("png", "image/png"),
-    APPLICATION_JSON("", "application/json"),
+    APPLICATION_JSON("application/json", "application/json"),
     APPLICATION_OCTET_STREAM("*", "application/octet-stream");
 
     private final String type;
