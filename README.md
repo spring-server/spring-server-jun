@@ -12,7 +12,7 @@
 
 ## 💻 프로그램 실행
 
-application.yml 파일/설정 추가 후 데이터베이스 설정 값 등록. 
+app 모듈 application.yml 파일/설정 추가 후 데이터베이스 설정 값 등록. test 디렉토리에도 추가.
 
 ````yaml
  spring:
@@ -22,6 +22,25 @@ application.yml 파일/설정 추가 후 데이터베이스 설정 값 등록.
      username: ${USERNAME}
      password: ${PASSWORD}
 ````
+
+<br>
+<br>
+<br>
+<br>
+
+데이터베이스 스키마 생성. app 모듈의 resource 패키지 참조.
+
+```sql
+CREATE TABLE user
+(
+    id               BIGINT PRIMARY KEY NOT NULL AUTO_INCREMENT COMMENT 'PK',
+    username         VARCHAR(40)        NOT NULL COMMENT '사용자 이름',
+    password         VARCHAR(255)       NOT NULL COMMENT '패스워드',
+    created_at       TIMESTAMP          NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일',
+    last_modified_at TIMESTAMP          NULL     DEFAULT NULL COMMENT '최종 수정일',
+    deleted          VARCHAR(10)        NOT NULL COMMENT '삭제 유무'
+) engine 'InnoDB';
+```
 
 <br>
 <br>
