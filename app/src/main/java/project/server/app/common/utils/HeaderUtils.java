@@ -1,8 +1,6 @@
 package project.server.app.common.utils;
 
-import java.util.Map;
-import project.server.mvc.servlet.http.Cookie;
-import project.server.mvc.servlet.http.Cookies;
+import project.server.mvc.servlet.http.*;
 
 public final class HeaderUtils {
 
@@ -13,8 +11,7 @@ public final class HeaderUtils {
     }
 
     public static Long getSessionId(Cookies cookies) {
-        Map<String, Cookie> cookiesMap = cookies.getCookiesMap();
-        Cookie findCookie = cookiesMap.get(SESSION_ID);
+        Cookie findCookie = cookies.get(SESSION_ID);
         if (findCookie != null) {
             return extractSessionId(findCookie);
         }
