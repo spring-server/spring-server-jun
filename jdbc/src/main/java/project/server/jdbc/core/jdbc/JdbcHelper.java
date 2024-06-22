@@ -46,6 +46,17 @@ public final class JdbcHelper {
             + " = 'TRUE' WHERE id = ?";
     }
 
+    public static String updatePassword(
+        Class<?> clazz,
+        String fieldName
+    ) {
+        return "UPDATE "
+            + convertCamelToSnake(clazz.getSimpleName())
+            + " SET "
+            + convertCamelToSnake(fieldName)
+            + " = ? WHERE id = ?";
+    }
+
     public static String selectAll(Class<?> clazz) {
         return "SELECT * FROM "
             + convertCamelToSnake(clazz.getSimpleName());

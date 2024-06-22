@@ -5,7 +5,7 @@ import project.server.mvc.springframework.annotation.Configuration;
 import project.server.mvc.springframework.web.servlet.DispatcherServlet;
 
 @Configuration
-public class ServletConfiguration {
+public class DispatcherServletAutoConfiguration {
 
     @Bean
     public DispatcherServlet dispatcherServlet() {

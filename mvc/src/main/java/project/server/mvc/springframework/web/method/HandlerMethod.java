@@ -2,7 +2,6 @@ package project.server.mvc.springframework.web.method;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
-import project.server.mvc.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
 public class HandlerMethod {
 
@@ -50,10 +49,6 @@ public class HandlerMethod {
 
     public Method getMethod() {
         return method;
-    }
-
-    public boolean handleStaticResource() {
-        return handler instanceof ResourceHttpRequestHandler;
     }
 
     @Override

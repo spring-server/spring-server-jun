@@ -11,6 +11,7 @@ import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
 import static project.server.mvc.servlet.http.HttpStatus.NO_CONTENT;
 import project.server.mvc.springframework.annotation.Controller;
+import project.server.mvc.springframework.annotation.DeleteMapping;
 import project.server.mvc.springframework.web.servlet.Handler;
 import project.server.mvc.springframework.web.servlet.ModelAndView;
 

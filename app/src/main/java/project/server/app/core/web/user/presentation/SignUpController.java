@@ -7,6 +7,7 @@ import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
 import static project.server.mvc.servlet.http.HttpStatus.OK;
 import project.server.mvc.springframework.annotation.Controller;
+import project.server.mvc.springframework.annotation.PostMapping;
 import project.server.mvc.springframework.annotation.RequestMapping;
 import project.server.mvc.springframework.web.servlet.Handler;
 import project.server.mvc.springframework.web.servlet.ModelAndView;
@@ -28,12 +29,13 @@ public class SignUpController implements Handler {
     }
 
     @Override
+    @PostMapping(path = "/sign-up")
     public ModelAndView process(
         HttpServletRequest request,
         HttpServletResponse response
     ) {
-        String username = request.getAttribute("username");
-        String password = request.getAttribute("password");
+        String username = (String) request.getAttribute("username");
+        String password = (String) request.getAttribute("password");
         log.info("username: {}, password: {}", username, password);
 
         validator.validateLoginInfo(username, password);

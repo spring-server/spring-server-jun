@@ -1,5 +1,6 @@
 package project.server.mvc.servlet;
 
+import project.server.mvc.servlet.http.ContentType;
 import project.server.mvc.servlet.http.Cookies;
 import project.server.mvc.servlet.http.HttpMethod;
 import project.server.mvc.servlet.http.RequestBody;
@@ -11,7 +12,10 @@ public interface HttpServletRequest extends ServletRequest {
     String getHost();
 
     @Override
-    String getContentType();
+    ContentType getContentType();
+
+    @Override
+    String getContentTypeAsString();
 
     RequestLine getRequestLine();
 
@@ -21,9 +25,13 @@ public interface HttpServletRequest extends ServletRequest {
 
     RequestBody getRequestBody();
 
-    String getAttribute(String key);
+    Object getAttribute(String key);
 
     Cookies getCookies();
 
     String getHeader(String key);
+
+    void setAttribute(String key, Object value);
+
+    boolean isContentType(ContentType contentType);
 }

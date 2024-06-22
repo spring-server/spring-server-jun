@@ -1,7 +1,6 @@
 package project.server.mvc.tomcat;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -12,10 +11,12 @@ import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
 import project.server.mvc.servlet.Request;
 import project.server.mvc.servlet.Response;
+import static project.server.mvc.servlet.http.ContentType.APPLICATION_JSON;
 import project.server.mvc.servlet.http.HttpHeaders;
 import project.server.mvc.servlet.http.RequestBody;
+import static project.server.mvc.servlet.http.RequestBody.createJsonRequestBody;
 import project.server.mvc.servlet.http.RequestLine;
-import static project.server.mvc.springframework.context.ApplicationContextProvider.getBean;
+import static project.server.mvc.springframework.context.ApplicationContext.getBean;
 import project.server.mvc.springframework.web.servlet.DispatcherServlet;
 
 @Slf4j
@@ -57,7 +58,6 @@ public class NioSocketWrapper implements Runnable {
             try (SocketChannel channel = this.socketChannel) {
                 HttpServletRequest request = createHttpServletRequest(lines, headerLines, requestBody);
                 HttpServletResponse response = new Response(channel);
-
                 this.response = response;
                 dispatcherServlet.service(request, response);
 
@@ -67,6 +67,7 @@ public class NioSocketWrapper implements Runnable {
                 }
             }
         } catch (Exception exception) {
+            responseError();
             log.error("message: {}", exception.getMessage());
         }
     }
@@ -90,9 +91,19 @@ public class NioSocketWrapper implements Runnable {
         List<String> headerLines,
         String requestBody
     ) {
+        RequestLine requestLine = new RequestLine(lines[START_LINE]);
+        HttpHeaders httpHeaders = new HttpHeaders(headerLines);
+        if (httpHeaders.isContentType(APPLICATION_JSON)) {
+            RequestBody body = createJsonRequestBody(requestBody);
+            return new Request(
+                requestLine,
+                httpHeaders,
+                body
+            );
+        }
         return new Request(
-            new RequestLine(lines[START_LINE]),
-            new HttpHeaders(headerLines),
+            requestLine,
+            httpHeaders,
             new RequestBody(requestBody)
         );
     }
@@ -103,5 +114,16 @@ public class NioSocketWrapper implements Runnable {
 
     public void flip() {
         buffer.flip();
+    }
+
+    private void responseError() {
+        ByteBuffer headerBuffer = ByteBuffer.wrap(response.toString().getBytes(UTF_8));
+        while (headerBuffer.hasRemaining()) {
+            try {
+                this.socketChannel.write(headerBuffer);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

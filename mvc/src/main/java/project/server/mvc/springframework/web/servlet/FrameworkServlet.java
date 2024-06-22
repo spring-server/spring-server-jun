@@ -5,24 +5,27 @@ import java.util.List;
 import project.server.mvc.servlet.HttpServletBean;
 import project.server.mvc.servlet.HttpServletRequest;
 import project.server.mvc.servlet.HttpServletResponse;
+import static project.server.mvc.springframework.context.ApplicationContext.getBean;
+import project.server.mvc.springframework.handler.HandlerInterceptor;
+import project.server.mvc.springframework.web.InterceptorRegistration;
+import project.server.mvc.springframework.web.InterceptorRegistry;
 import project.server.mvc.springframework.web.method.HandlerMethod;
 import project.server.mvc.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
 public abstract class FrameworkServlet extends HttpServletBean {
 
-    private static final HandlerMethod staticResourceHandlerMethod = new HandlerMethod(new ResourceHttpRequestHandler());
+    private final List<InterceptorRegistration> interceptors;
+    private final HandlerMethod staticResourceHandlerMethod;
     private static final String EMPTY_STRING = "";
     private static final List<String> staticResources = List.of(".js", ".css", ".favicon", ".jpg", ".jpeg", ".png");
     private static final List<String> excludeStaticResources = List.of("my-info.html");
 
-    @Override
-    public void init() {
-        super.init();
-    }
+    public FrameworkServlet() {
+        init();
+        InterceptorRegistry registration = getBean(InterceptorRegistry.class);
 
-    @Override
-    public void destroy() {
-        super.destroy();
+        this.interceptors = registration.getInterceptors();
+        this.staticResourceHandlerMethod = getBean(HandlerMethod.class);
     }
 
     @Override
@@ -34,6 +37,22 @@ public abstract class FrameworkServlet extends HttpServletBean {
             processStaticRequest(request, response);
             return;
         }
+        processRequest(request, response);
+    }
+
+    @Override
+    protected void doPost(
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) throws Exception {
+        processRequest(request, response);
+    }
+
+    @Override
+    protected void doPut(
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) throws Exception {
         processRequest(request, response);
     }
 
@@ -61,6 +80,12 @@ public abstract class FrameworkServlet extends HttpServletBean {
         HttpServletResponse response
     ) throws IOException {
         ResourceHttpRequestHandler handler = (ResourceHttpRequestHandler) staticResourceHandlerMethod.getHandler();
+        for (InterceptorRegistration registration : interceptors) {
+            if (registration.contains(request.getRequestUri())) {
+                HandlerInterceptor interceptor = registration.getHandlerInterceptor();
+                interceptor.preHandle(request, response, handler);
+            }
+        }
         handler.handleRequest(request, response);
     }
 
@@ -69,14 +94,6 @@ public abstract class FrameworkServlet extends HttpServletBean {
         HttpServletResponse response
     ) throws Exception {
         doService(request, response);
-    }
-
-    @Override
-    protected void doPost(
-        HttpServletRequest request,
-        HttpServletResponse response
-    ) throws Exception {
-        processRequest(request, response);
     }
 
     protected abstract void doService(HttpServletRequest request, HttpServletResponse response) throws Exception;

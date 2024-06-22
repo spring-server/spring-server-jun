@@ -39,6 +39,9 @@ public abstract class AbstractHandlerMethodAdapter implements HandlerAdapter {
         log.info("args: {}", args);
         Object result = method.invoke(instance, args);
         log.info("result: {}", result);
+        if (result == null) {
+            return null;
+        }
         return (ModelAndView) result;
     }
 }

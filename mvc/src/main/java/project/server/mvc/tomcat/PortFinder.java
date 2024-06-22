@@ -8,7 +8,7 @@ public final class PortFinder {
 
     private static final int MIN_PORT_NUMBER = 1;
     private static final int MAX_PORT_NUMBER = 65535;
-    private static final int DEFAULT_PORT = 8086;
+    private static final int DEFAULT_PORT = 8080;
 
     public static int findPort(String[] args) {
         if (args == null || args.length == 0) {

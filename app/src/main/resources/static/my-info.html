@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>회원 상세정보 - Bootstrap</title>
-
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <style>
@@ -30,7 +28,6 @@
         }
     </style>
 </head>
-
 <body>
 <div class="container">
     <div class="input-form-backgroud row">
@@ -40,78 +37,57 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="username">ID</label>
-                        <input type="text" class="form-control" id="username" placeholder="" value="*" required>
+                        <input type="text" class="form-control" id="username" placeholder="" value="*" required
+                               readonly>
                         <div class="invalid-feedback">
                             ID를 입력해주세요.
                         </div>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="password">패스워드</label>
-                        <input type="text" class="form-control" id="password" placeholder="" value="\" required>
+                        <input type="password" class="form-control" id="password" placeholder="" required>
                         <div class="invalid-feedback">
                             비밀번호를 입력해주세요.
                         </div>
                     </div>
                 </div>
-                <div class="mb-3">
-                    <label for="email">이메일</label>
-                    <input type="email" class="form-control" id="email" placeholder="you@example.com" required>
-                    <div class="invalid-feedback">
-                        이메일을 입력해주세요.
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label for="address">주소<span class="text-muted">&nbsp;(필수 아님)</span></label>
-                    <input type="text" class="form-control" id="address" placeholder="서울특별시 강남구" required>
-                    <div class="invalid-feedback">
-                        주소를 입력해주세요.
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label for="address2">상세주소<span class="text-muted">&nbsp;(필수 아님)</span></label>
-                    <input type="text" class="form-control" id="address2" placeholder="상세주소를 입력해주세요.">
-                </div>
-                <hr class="mb-4">
-                <div class="custom-control custom-checkbox">
-                    <input type="checkbox" class="custom-control-input" id="aggrement" required>
-                    <label class="custom-control-label" for="aggrement">개인정보 수집 및 이용에 동의합니다.</label>
-                </div>
-                <div class="mb-4"></div>
                 <button class="btn btn-primary btn-lg btn-block" type="submit">수정</button>
             </form>
         </div>
     </div>
-
-
     <footer class="my-3 text-center text-small">
     </footer>
 </div>
 <script>
-    window.addEventListener('load', () => {
-        const forms = document.getElementsByClassName('validation-form');
-        Array.prototype.filter.call(forms, (form) => {
-            form.addEventListener('submit', function (event) {
-                if (form.checkValidity() === false) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                form.classList.add('was-validated');
-            }, false);
-        });
-    }, false);
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('.validation-form');
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
 
-    window.addEventListener('DOMContentLoaded', (event) => {
-        fetch('http://localhost:8086/my-info.html')
-            .then(response => {
-                if (response.status === 301) {
-                    window.location.href = '/';
-                }
+            const formData = {
+                password: document.getElementById('password').value
+            };
+
+            fetch('http://localhost:8080/api/users', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
             })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+                .then(response => {
+                    if (response.ok) {
+                        alert('비밀번호가 변경되었습니다.');
+                    } else {
+                        throw new Error('서버 에러 발생');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('비밀번호 변경에 실패하였습니다.');
+                });
+        });
     });
 </script>
 </body>
-
 </html>

@@ -12,18 +12,41 @@ public class RequestBody {
     private static final int KEY = 0;
     private static final int VALUE = 1;
 
-    private final Map<String, String> attributes;
+    private final Map<String, Object> attributes;
 
     public RequestBody(String body) {
         if (body == null || body.isBlank()) {
-            attributes = null;
+            attributes = new HashMap<>();
             return;
         }
         this.attributes = parseBody(body);
     }
 
-    private Map<String, String> parseBody(String body) {
-        Map<String, String> attributes = new HashMap<>();
+    public RequestBody(Map<String, Object> attributes) {
+        this.attributes = attributes;
+    }
+
+    public static RequestBody createJsonRequestBody(String body) {
+        if (body == null || body.isBlank()) {
+            return new RequestBody(new HashMap<>());
+        }
+
+        String parsedBody = body.replaceAll("\"", "")
+            .replaceAll("\\{", "")
+            .replaceAll("}", "");
+
+        Map<String, Object> attribute = new HashMap<>();
+
+        String[] bodyArray = parsedBody.split(",");
+        for (String eachBody : bodyArray) {
+            String[] element = eachBody.split(":");
+            attribute.put(element[KEY], element[VALUE]);
+        }
+        return new RequestBody(attribute);
+    }
+
+    private Map<String, Object> parseBody(String body) {
+        Map<String, Object> attributes = new HashMap<>();
         String[] bodyArray = body.split(VALUES_DELIMITER);
         for (String element : bodyArray) {
             String[] pair = element.split(VALUE_DELIMITER);
@@ -32,7 +55,14 @@ public class RequestBody {
         return attributes;
     }
 
-    public String getAttribute(String key) {
+    public void setAttribute(
+        String key,
+        Object value
+    ) {
+        attributes.put(key, value);
+    }
+
+    public Object getAttribute(String key) {
         return attributes.get(key);
     }
 

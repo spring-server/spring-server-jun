@@ -7,12 +7,13 @@ import project.server.app.core.domain.user.UserRepository;
 import project.server.app.core.web.user.application.UserDeleteUseCase;
 import project.server.app.core.web.user.application.UserSaveUseCase;
 import project.server.app.core.web.user.application.UserSearchUseCase;
+import project.server.app.core.web.user.application.UserUpdateUseCase;
 import project.server.app.core.web.user.exception.DuplicatedUsernameException;
 import project.server.app.core.web.user.exception.UserNotFoundException;
 import project.server.mvc.springframework.annotation.Service;
 
 @Service
-public class UserService implements UserSaveUseCase, UserSearchUseCase, UserDeleteUseCase {
+public class UserService implements UserSaveUseCase, UserSearchUseCase, UserUpdateUseCase, UserDeleteUseCase {
 
     private final UserRepository userRepository;
 
@@ -41,6 +42,16 @@ public class UserService implements UserSaveUseCase, UserSearchUseCase, UserDele
             throw new UserNotFoundException();
         }
         return findUser;
+    }
+
+    @Override
+    public void update(
+        LoginUser loginUser,
+        String password
+    ) {
+        User findUser = userRepository.findById(loginUser.getUserId())
+            .orElseThrow(UserNotFoundException::new);
+        userRepository.update(findUser.getId(), password);
     }
 
     @Override
